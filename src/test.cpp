@@ -40,7 +40,22 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-	
+
+	// 生成一个顶点缓冲对象(vertex buffer object, VBO)
+	unsigned int vbo;
+	{
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);	// 将对象绑定到缓冲类型
+
+		// 设置顶点数组标准化设备坐标(Normalized Device Coordinates)
+		float vertices[] = {
+			-0.5f, -0.5f, 0.0f,
+			 0.5f, -0.5f, 0.0f,
+			 0.0f,  0.5f, 0.0f,
+		};
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);	// 将顶点数据传入
+	}
+
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))
 	{
