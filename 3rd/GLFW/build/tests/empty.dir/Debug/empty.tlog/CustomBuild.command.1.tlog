@@ -1,0 +1,10 @@
+^E:\GAMEENGINESOURCE\REPOS\OPENGLPRACTICE2\3RD\GLFW\TESTS\CMAKELISTS.TXT
+setlocal
+D:\cmake\cmake\bin\cmake.exe -SE:/GameEngineSource/Repos/OpenGLPractice2/3rd/GLFW -BE:/GameEngineSource/Repos/OpenGLPractice2/3rd/GLFW/build --check-stamp-file E:/GameEngineSource/Repos/OpenGLPractice2/3rd/GLFW/build/tests/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

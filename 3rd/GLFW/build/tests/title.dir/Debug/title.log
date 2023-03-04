@@ -1,0 +1,6 @@
+﻿  Building Custom Rule E:/GameEngineSource/Repos/OpenGLPractice2/3rd/GLFW/tests/CMakeLists.txt
+  title.c
+E:\GameEngineSource\Repos\OpenGLPractice2\3rd\GLFW\tests\title.c(1,1): warning C4819: The file contains a character that cannot be represented in the current code page (936). Save the file in Unicode format to prevent data loss
+  glad_gl.c
+  Generating Code...
+  title.vcxproj -> E:\GameEngineSource\Repos\OpenGLPractice2\3rd\GLFW\build\tests\Debug\title.exe
