@@ -4,3 +4,9 @@ x64/
 
 # Files
 *.user
+
+# Visual Studio files and folder
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
