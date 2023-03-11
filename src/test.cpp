@@ -11,6 +11,14 @@ void proccessInput(GLFWwindow* window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+// 顶点着色器源码
+const char* vertexShaderSource = "#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"void main()\n"
+"{\n"
+"	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"}\0";
+
 int main()
 {
 	// 初始化glfw
@@ -40,6 +48,32 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
+
+
+	// 创建和编译着色器程序
+	// 顶点着色器
+	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	{
+		glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+		glCompileShader(vertexShader);
+
+		// 判断是否成功
+		int success;
+		char infoLog[512];
+		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+		if (!success)
+		{			
+			std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+				<< infoLog << std::endl;
+		}
+		else
+		{
+			std::cout << "INFO::SHADER::VERTEX::COMPILATION_SUCCESS\n"
+				<< infoLog << std::endl;
+		}
+	}
+
 
 	// 生成一个顶点缓冲对象(vertex buffer object, VBO)
 	unsigned int vbo;
