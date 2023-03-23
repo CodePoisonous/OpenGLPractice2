@@ -106,33 +106,52 @@ int main()
 		glDeleteShader(fragmentShader);
 	}
 
-	// 生成一个顶点缓冲对象(vertex buffer object, VBO)
-	unsigned int vbo;
+	// 生成一个顶点数组对象(vertex array object, VAO)
+	// 一个顶点缓冲对象(vertex buffer object, VBO)
+	// 一个元素\索引缓冲数组(element\index buffer object, EBO\IBO)
+	unsigned int vao, vbo, ebo;
 	{
+		// 生成对象
+		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);	// 将对象绑定到缓冲类型
+		glGenBuffers(1, &ebo);
+
+		// 绑定对象
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
 		// 设置顶点数组标准化设备坐标(Normalized Device Coordinates)
 		float vertices[] = {
-			-0.5f, -0.5f, 0.0f,
-			 0.5f, -0.5f, 0.0f,
-			 0.0f,  0.5f, 0.0f,
+			 0.5f,  0.5f, 0.0f,	// 右上角
+			 0.5f, -0.5f, 0.0f,	// 右下角
+			-0.5f, -0.5f, 0.0f,	// 左下角
+			-0.5f,  0.5f, 0.0f,	// 左上角
 		};
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);	// 将顶点数据传入
-	}
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);		// 将顶点数据传入
 
-	// 生成一个顶点数组对象(vertex array object, VAO)
-	unsigned int vao;
-	{
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // 解释顶点数据
+		// 设置顶点属性指针
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);	// 解释顶点数据
 		glEnableVertexAttribArray(0);	// 启用顶点属性
+
+		// 设置索引数组
+		unsigned int indices[] = {
+			// 索引是从0开始
+			// 此例的索引值是顶点数组vertices的下标
+			// 这样可以由下标代表顶点组合成矩形
+			0, 1, 3,	// 第一个三角形
+			1, 2, 3,	// 第二个三角形
+		};
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+		// 解绑vbo和vao（防止被意外修改）
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
-	// 解绑vbo和vao（防止被意外修改）
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	// 设置图元绘制方式
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);	// 线
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);	// 面
 
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))
@@ -145,17 +164,20 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);			// 清楚颜色缓冲，填充glClearColor所设置的颜色
 
 		// 绘制三角形
-		glUseProgram(shaderProgram);	// 激活
+		glUseProgram(shaderProgram);			// 激活
 		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	// 按ebo规则绘制
+		//glDrawArrays(GL_TRIANGLES, 0, 3);						// 直接绘制
+		//glBindVertexArray(0);
 
-		glfwSwapBuffers(window);	// 交换指定窗口的前后端缓冲区
-		glfwPollEvents();			// 处理所有挂起事件
+		glfwSwapBuffers(window);				// 交换指定窗口的前后端缓冲区
+		glfwPollEvents();						// 处理所有挂起事件
 	}
 
 	// 释放、删除之前分配的所有资源
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &ebo);
 	glDeleteProgram(shaderProgram);
 	glfwTerminate();
     return 0;
