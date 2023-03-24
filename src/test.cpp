@@ -174,9 +174,9 @@ int main()
 
 		// 更新uniform颜色
 		float timeValue = (float)glfwGetTime();
-		float greenValue = sin(timeValue);
+		float redValue = sin(timeValue);
 		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+		glUniform4f(vertexColorLocation, redValue, 0.0f, 0.0f, 1.0f);
 
 		// 绘制图元
 		glBindVertexArray(vao);
