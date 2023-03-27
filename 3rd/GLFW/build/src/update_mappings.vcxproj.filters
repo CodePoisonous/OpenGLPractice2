@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="E:\GameEngineSource\Repos\OpenGLPractice2\3rd\GLFW\build\CMakeFiles\a98d25777576b36233b1e0491076b287\update_mappings.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="E:\GameEngineSource\Repos\OpenGLPractice2\3rd\GLFW\src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="E:\GameEngineSource\Repos\OpenGLPractice2\3rd\GLFW\src\mappings.h.in">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="E:\GameEngineSource\Repos\OpenGLPractice2\3rd\GLFW\CMake\GenerateMappings.cmake" />
+    <None Include="E:\GameEngineSource\Repos\OpenGLPractice2\3rd\GLFW\build\src\CMakeFiles\update_mappings" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{B0E6DA51-1F1D-34E7-A46F-4997D9C1C5BD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{0CCEF059-2D26-3467-B27B-E599937FA220}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
