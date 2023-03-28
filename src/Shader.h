@@ -10,7 +10,7 @@ public:
 	~Shader();
 
 public:	
-	void use() const;		// 激活着色器程序
+	void use() const;			// 激活着色器程序
 	void deleteProgram() const;	// 删除着色器程序
 
 public:
@@ -21,7 +21,7 @@ public:
 
 private:	
 	void compileShader(const std::string& vertexSource, const std::string& fragmentSource);	// 编译着色器源码
-	void LinkProgram();		// 链接着色器程序
+	void LinkProgram();			// 链接着色器程序
 
 private:
 	unsigned int m_shaderProgramID;		// 着色器程序ID
