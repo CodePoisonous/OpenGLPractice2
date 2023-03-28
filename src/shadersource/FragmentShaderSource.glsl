@@ -12,6 +12,5 @@ uniform float MixValue;
 
 void main()
 {
-	// 返回80%第一个输入，20%第二个输入
 	FragColor = mix(texture(Texture1, TexCoord), texture(Texture2, TexCoord), MixValue);
 }
