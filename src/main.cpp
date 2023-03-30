@@ -224,11 +224,11 @@ void proccessInput(GLFWwindow* window)
 	
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
-		if(MixValue < 1.0f) MixValue += 0.001f;
+		if(MixValue < 1.0f) MixValue += 0.01f;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
-		if (MixValue > 0.0f) MixValue -= 0.001f;
+		if (MixValue > 0.0f) MixValue -= 0.01f;
 	}
 }
