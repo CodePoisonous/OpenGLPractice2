@@ -3,6 +3,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #define  STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -15,10 +19,18 @@ void proccessInput(GLFWwindow* window);
 
 // 窗口大小
 const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_HEIGHT = 800;
 
-// 纹理混合系数
-float MixValue = 0.2f;
+// 缩放尺寸
+float scale_x = 1.0;
+float scale_y = 1.0;
+
+// 旋转角度
+float angle = 0.0;
+
+// 移动范围
+float move_x = 0.0;
+float move_y = 0.0;
 
 int main()
 {
@@ -190,10 +202,18 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
-		shaderProgram.setFloat("MixValue", MixValue);
+		// 创建变换矩阵
+		glm::mat4 trans(1.0f);
+		trans = glm::translate(trans, glm::vec3(move_x, move_y, 0.0f));
+		trans = glm::rotate(trans, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));	// 绕z轴逆时针转
+		trans = glm::scale(trans, glm::vec3(scale_x, scale_y, 1.0f));	// xy轴方向缩放
+
+
+		// 激活着色器程序
+		shaderProgram.use();
+		shaderProgram.setMatrix4fv("transform", glm::value_ptr(trans));
 
 		// 绘制图元
-		shaderProgram.use();
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	// 按ebo规则绘制
 
@@ -224,11 +244,57 @@ void proccessInput(GLFWwindow* window)
 	
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
-		if(MixValue < 1.0f) MixValue += 0.01f;
+		move_y += 0.01f;
+		if (move_y >= 400.0f) move_y = 400.0f;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
-		if (MixValue > 0.0f) MixValue -= 0.01f;
+		move_y -= 0.01f;
+		if (move_y <= -400.0f) move_y = -400.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	{
+		move_x -= 0.01f;
+		if (move_x <= -400.0f) move_x = -400.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	{
+		move_x += 0.01f;
+		if (move_x >= 400.0f) move_x = 400.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		scale_y += 0.01f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		scale_y -= 0.01f;
+		if (scale_y <= 0.0f) scale_y = 0.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		scale_x += 0.01f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		scale_x -= 0.01f;
+		if (scale_x <= 0.0f) scale_x = 0.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		angle += 5.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+		angle -= 5.0f;
 	}
 }
