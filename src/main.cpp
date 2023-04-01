@@ -202,16 +202,33 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
-		// 创建变换矩阵
-		glm::mat4 trans(1.0f);
-		trans = glm::translate(trans, glm::vec3(move_x, move_y, 0.0f));
-		trans = glm::rotate(trans, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));	// 绕z轴逆时针转
-		trans = glm::scale(trans, glm::vec3(scale_x, scale_y, 1.0f));	// xy轴方向缩放
+		// 创建模型矩阵(model matrix)
+		glm::mat4 model(1.0f);
+		{
+			// 让模型绕局部坐标的x轴顺时针旋转-55°
+			model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		}
+
+		// 创建观察矩阵(view matrix)
+		glm::mat4 view(1.0f);
+		{
+			// 让模型沿世界坐标的z轴负方向移动3个单位
+			// (相当于摄像机沿世界坐标z轴正方向移动了3个单位)
+			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		}
+
+		// 创建投影矩阵(project matrix)
+		// 透视投影
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		// 正射投影		
+		//glm::mat4 projection = glm::ortho(-800.0f, 800.0f, -800.0f, 800.0f, 0.1f, 100.0f);
 
 
 		// 激活着色器程序
 		shaderProgram.use();
-		shaderProgram.setMatrix4fv("transform", glm::value_ptr(trans));
+		shaderProgram.setMatrix4fv("model", glm::value_ptr(model));
+		shaderProgram.setMatrix4fv("view", glm::value_ptr(view));
+		shaderProgram.setMatrix4fv("projection", glm::value_ptr(projection));
 
 		// 绘制图元
 		glBindVertexArray(vao);
