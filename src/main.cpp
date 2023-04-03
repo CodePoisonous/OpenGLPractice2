@@ -15,22 +15,21 @@
 
 // 函数声明
 void frambuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void proccessInput(GLFWwindow* window);
 
 // 窗口大小
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
 
-// 缩放尺寸
-float scale_x = 1.0;
-float scale_y = 1.0;
+// 摄像机状态
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);		// 摄像机位置向量
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);	// 摄像机方向向量
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);		// y轴正方向
 
-// 旋转角度
-float angle = 0.0;
-
-// 移动范围
-float move_x = 0.0;
-float move_y = 0.0;
+// 记录没帧之间的时间差值
+float deltaTime = 0.0f;	// 当前帧与上一帧的时间差
+float lastFrame = 0.0f;	// 上一帧的时间
 
 int main()
 {
@@ -233,8 +232,15 @@ int main()
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))
 	{
+		float currentFrame = (float)glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
 		// 监控键盘按键输入
 		proccessInput(window);
+
+		// 监控鼠标位置
+		glfwSetCursorPosCallback(window, mouse_callback);
 
 		// 渲染
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);	// 设置用来清空屏幕的颜色
@@ -260,9 +266,8 @@ int main()
 		// 创建观察矩阵(view matrix)
 		glm::mat4 view(1.0f);
 		{
-			// 让模型沿世界坐标的z轴负方向移动3个单位
-			// (相当于摄像机沿世界坐标z轴正方向移动了3个单位)
-			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+			view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
 			shaderProgram.setMatrix4fv("view", glm::value_ptr(view));
 		}
 
@@ -278,7 +283,7 @@ int main()
 
 			// 让模型以不同的速度绕局部坐标的x轴旋转
 			model = glm::rotate(model,
-				(float)glfwGetTime() * glm::radians(25.0f) * (i+1), glm::vec3(0.5f, 1.0f, 0.0f));
+				currentFrame * glm::radians(25.0f) * (i+1), glm::vec3(0.5f, 1.0f, 0.0f));
 
 			// 转换矩阵传入着色器
 			shaderProgram.setMatrix4fv("model", glm::value_ptr(model));
@@ -317,59 +322,47 @@ void proccessInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);// 用户按下esc键，关闭窗口
 	
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-	{
-		move_y += 0.01f;
-		if (move_y >= 400.0f) move_y = 400.0f;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-	{
-		move_y -= 0.01f;
-		if (move_y <= -400.0f) move_y = -400.0f;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-	{
-		move_x -= 0.01f;
-		if (move_x <= -400.0f) move_x = -400.0f;
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-	{
-		move_x += 0.01f;
-		if (move_x >= 400.0f) move_x = 400.0f;
-	}
-
+	float cameraSpeed = 2.5f * deltaTime;	// 相机速度
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		scale_y += 0.01f;
-	}
+		cameraPos += cameraSpeed * cameraFront;
 
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		scale_y -= 0.01f;
-		if (scale_y <= 0.0f) scale_y = 0.0f;
-	}
+		cameraPos -= cameraSpeed * cameraFront;
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		scale_x += 0.01f;
-	}
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		scale_x -= 0.01f;
-		if (scale_x <= 0.0f) scale_x = 0.0f;
-	}
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-	{
-		angle += 5.0f;
-	}
 
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-	{
-		angle -= 5.0f;
-	}
+	//if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	//{
+	//}
+
+	//if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+	//{
+	//}
+
+	//if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	//{
+	//}
+
+	//if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	//{
+	//}
+
+
+	//if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	//{
+	//}
+
+	//if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	//{
+	//}
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+
 }
