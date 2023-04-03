@@ -78,7 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)3rd\GLFW\include;$(ProjectDir)3rd\Glad\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)3rd\GLFW\include;$(ProjectDir)3rd\Glad\include;$(ProjectDir)3rd\glm;$(ProjectDir)3rd\stb_image;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)3rd\GLFW\build\src\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -148,7 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Shader.h" />
-    <ClInclude Include="src\stb_image.h" />
+    <ClInclude Include="3rd\stb_image\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -18,6 +18,7 @@ public:
 	void setBool(const std::string& name, bool value) const;
 	void setInt(const std::string& name, int value) const;
 	void setFloat(const std::string& name, float value) const;
+	void setMatrix4fv(const std::string& name, const float* value) const;
 
 private:	
 	void compileShader(const std::string& vertexSource, const std::string& fragmentSource);	// ±àÒë×ÅÉ«Æ÷Ô´Âë

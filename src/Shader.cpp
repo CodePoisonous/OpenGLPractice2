@@ -73,6 +73,11 @@ void Shader::setFloat(const std::string& name, float value) const
 	glUniform1f(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
 }
 
+void Shader::setMatrix4fv(const std::string& name, const float* value) const
+{
+	glUniformMatrix4fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, value);
+}
+
 void Shader::compileShader(const string& vertexSource, const string& fragmentSource)
 {
 	// 生成一个顶点着色器对象，并编译顶点着色器源码

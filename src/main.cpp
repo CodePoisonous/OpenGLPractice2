@@ -3,6 +3,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #define  STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -15,10 +19,18 @@ void proccessInput(GLFWwindow* window);
 
 // 窗口大小
 const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_HEIGHT = 800;
 
-// 纹理混合系数
-float MixValue = 0.2f;
+// 缩放尺寸
+float scale_x = 1.0;
+float scale_y = 1.0;
+
+// 旋转角度
+float angle = 0.0;
+
+// 移动范围
+float move_x = 0.0;
+float move_y = 0.0;
 
 int main()
 {
@@ -50,62 +62,106 @@ int main()
 		return -1;
 	}
 
+	// 配置全局的Opengl状态
+	glEnable(GL_DEPTH_TEST);	// 打开深度测试
+
 	// 生成着色器程序
 	Shader shaderProgram("src/shadersource/VertexShaderSource.glsl", "src/shadersource/FragmentShaderSource.glsl");
 
-	// 生成一个顶点数组对象(vertex array object, VAO)
-	// 一个顶点缓冲对象(vertex buffer object, VBO)
-	// 一个元素\索引缓冲数组(element\index buffer object, EBO\IBO)
+	// 设定立方体在世界坐标系的位置
+	glm::vec3 cubePositions[] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
+	// 生成VAO、VBO、EBO
 	unsigned int vao, vbo, ebo;
 	{
 		// 生成对象
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
-		glGenBuffers(1, &ebo);
+		//glGenBuffers(1, &ebo);
 
 		// 绑定对象
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 
 		// 设置顶点数组标准化设备坐标(Normalized Device Coordinates)
 		// 设置每个顶点对应的颜色信息
-		float vertices[] = {
-			 // 位置				 // 颜色			    // 纹理坐标
-			 0.5f,  0.5f, 0.0f,	 1.0f, 0.0f, 0.0f,  1.0f, 1.0f,	// 右上角
-			 0.5f, -0.5f, 0.0f,	 0.0f, 1.0f, 0.0f,  1.0f, 0.0f,	// 右下角
-			-0.5f, -0.5f, 0.0f,	 0.0f, 0.0f, 1.0f,  0.0f, 0.0f,	// 左下角
-			-0.5f,  0.5f, 0.0f,	 0.5f, 0.5f, 0.5f,  0.0f, 1.0f,	// 左上角
+		float vertices[] = {	
+			// 立方体坐标		// 纹理坐标
+			-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+			 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+			-0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+			-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+			-0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+
+			-0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+
+			 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+
+			-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+			-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+			-0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f, 0.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f, 0.0f, 1.0f
 		};
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);		// 将顶点数据传入
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 		// 设置顶点属性指针
 		{
 			// 位置属性
 			glVertexAttribPointer(
-				0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);	// 解释顶点数据
-			glEnableVertexAttribArray(0);	// 启用顶点属性（对应vertexShaderSource中的location = 0）
-
-			// 颜色属性
-			glVertexAttribPointer(
-				1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));	// 解释顶点数据
-			glEnableVertexAttribArray(1);	// 启用顶点属性（对应vertexShaderSource中的location = 1）
+				0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(0); // 启用顶点属性（对应vertexShaderSource中的location = 0）
 
 			// 纹理属性
 			glVertexAttribPointer(
-				2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));	// 解释顶点数据
-			glEnableVertexAttribArray(2);	// 启用顶点属性（对应vertexShaderSource中的location = 2）
+				1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(1); // 启用顶点属性（对应vertexShaderSource中的location = 1）
 		}
 
-		// 设置索引数组
-		unsigned int indices[] = {
-			// 索引是从0开始
-			// 此例的索引值是顶点数组vertices的下标
-			// 这样可以由下标代表顶点组合成矩形
-			0, 1, 3,	// 第一个三角形
-			1, 2, 3,	// 第二个三角形
-		};
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		//// 设置索引数组
+		//unsigned int indices[] = {		
+		//	0, 1, 3,	// 第一个三角形
+		//	1, 2, 3,	// 第二个三角形
+		//};
+		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 		// 解绑vbo和vao（防止被意外修改）
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -182,20 +238,59 @@ int main()
 
 		// 渲染
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);	// 设置用来清空屏幕的颜色
-		glClear(GL_COLOR_BUFFER_BIT);			// 清楚颜色缓冲，填充glClearColor所设置的颜色
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// 清除颜色\深度缓冲
 
 		// 激活并绑定纹理单元
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
+		
+		// 激活着色器程序
+		shaderProgram.use();
 
-		shaderProgram.setFloat("MixValue", MixValue);
+		// 创建投影矩阵(project matrix)
+		// 透视投影
+		glm::mat4 projection(1.0f);
+		{
+			projection = glm::perspective(glm::radians(80.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+			shaderProgram.setMatrix4fv("projection", glm::value_ptr(projection));
+		}
+
+		// 创建观察矩阵(view matrix)
+		glm::mat4 view(1.0f);
+		{
+			// 让模型沿世界坐标的z轴负方向移动3个单位
+			// (相当于摄像机沿世界坐标z轴正方向移动了3个单位)
+			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+			shaderProgram.setMatrix4fv("view", glm::value_ptr(view));
+		}
+
+		// 绘制10个立方体
+		glBindVertexArray(vao);
+		for (unsigned int i = 0; i < 10; ++i)
+		{
+			// 创建模型矩阵(model matrix)
+			glm::mat4 model(1.0f);
+
+			// 让模型移动到指定的世界坐标系位置
+			model = glm::translate(model, cubePositions[i]);
+
+			// 让模型以不同的速度绕局部坐标的x轴旋转
+			model = glm::rotate(model,
+				(float)glfwGetTime() * glm::radians(25.0f) * (i+1), glm::vec3(0.5f, 1.0f, 0.0f));
+
+			// 转换矩阵传入着色器
+			shaderProgram.setMatrix4fv("model", glm::value_ptr(model));
+
+			// 绘制立方体
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		// 绘制图元
-		shaderProgram.use();
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	// 按ebo规则绘制
+		//glBindVertexArray(vao);
+		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);	// 按ebo规则绘制
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glfwSwapBuffers(window);				// 交换指定窗口的前后端缓冲区
 		glfwPollEvents();						// 处理所有挂起事件
@@ -224,11 +319,57 @@ void proccessInput(GLFWwindow* window)
 	
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
-		if(MixValue < 1.0f) MixValue += 0.001f;
+		move_y += 0.01f;
+		if (move_y >= 400.0f) move_y = 400.0f;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 	{
-		if (MixValue > 0.0f) MixValue -= 0.001f;
+		move_y -= 0.01f;
+		if (move_y <= -400.0f) move_y = -400.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+	{
+		move_x -= 0.01f;
+		if (move_x <= -400.0f) move_x = -400.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	{
+		move_x += 0.01f;
+		if (move_x >= 400.0f) move_x = 400.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	{
+		scale_y += 0.01f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	{
+		scale_y -= 0.01f;
+		if (scale_y <= 0.0f) scale_y = 0.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	{
+		scale_x += 0.01f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+	{
+		scale_x -= 0.01f;
+		if (scale_x <= 0.0f) scale_x = 0.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		angle += 5.0f;
+	}
+
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+	{
+		angle -= 5.0f;
 	}
 }
