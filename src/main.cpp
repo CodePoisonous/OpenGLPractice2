@@ -16,6 +16,7 @@
 // 函数声明
 void frambuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void proccessInput(GLFWwindow* window);
 
 // 窗口大小
@@ -26,6 +27,14 @@ const unsigned int SCR_HEIGHT = 800;
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);		// 摄像机位置向量
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);	// 摄像机方向向量
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);		// y轴正方向
+
+// 鼠标状态
+bool firstMouse = true;	// 鼠标是否第一次进入窗口
+float yaw = -90.0f;		// 偏航角
+float pitch = 0.0f;		// 俯仰角
+float lastX = SCR_WIDTH * 0.5;	// 鼠标在x轴前一帧的位置
+float lastY = SCR_HEIGHT * 0.5;	// 鼠标在y轴前一帧的位置
+float fov = 45.0f;		// 投影夹角
 
 // 记录没帧之间的时间差值
 float deltaTime = 0.0f;	// 当前帧与上一帧的时间差
@@ -52,6 +61,11 @@ int main()
 		}
 		glfwMakeContextCurrent(window);	// 窗口的上下文设置为当前线程的主上下文	
 		glfwSetFramebufferSizeCallback(window, frambuffer_size_callback); // 调整窗口尺寸时同步调整视口尺寸
+		glfwSetCursorPosCallback(window, mouse_callback);// 鼠标位置
+		glfwSetScrollCallback(window, scroll_callback);	 // 滚轮转动
+
+		// 程序运行时，隐藏掉光标
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 
 	// 初始化glad: 加载所有OpenGL功能的指针
@@ -239,9 +253,6 @@ int main()
 		// 监控键盘按键输入
 		proccessInput(window);
 
-		// 监控鼠标位置
-		glfwSetCursorPosCallback(window, mouse_callback);
-
 		// 渲染
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);	// 设置用来清空屏幕的颜色
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// 清除颜色\深度缓冲
@@ -255,11 +266,10 @@ int main()
 		// 激活着色器程序
 		shaderProgram.use();
 
-		// 创建投影矩阵(project matrix)
-		// 透视投影
+		// 创建投影矩阵(project matrix) 		
 		glm::mat4 projection(1.0f);
 		{
-			projection = glm::perspective(glm::radians(80.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+			projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 			shaderProgram.setMatrix4fv("projection", glm::value_ptr(projection));
 		}
 
@@ -316,6 +326,57 @@ void frambuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 }
 
+// 回调函数：鼠标移动
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	float xPos = (float)xpos;
+	float yPos = (float)ypos;
+	
+	// 第一次时初始化位置
+	if (firstMouse)
+	{
+		lastX = xPos;
+		lastY = yPos;
+		firstMouse = false;
+	}
+
+	// 计算两帧之间的鼠标位移
+	float xoffset = xPos - lastX;
+	float yoffset = lastY - yPos;	// 窗口坐标和opengl的y轴坐标是反的
+	
+	// 保存当前帧的位置
+	lastX = xPos;
+	lastY = yPos;
+
+	// 设置鼠标灵敏度
+	float sensitivity = 0.1f;
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	// 修改俯仰角和偏航角
+	pitch += yoffset;
+	yaw += xoffset;
+
+	// 限制俯仰角和偏航角的范围
+	if (pitch > 89.0f) pitch = 89.0f;
+	if (pitch < -89.0f) pitch = -89.0f;
+
+	// 更新摄像机方向向量
+	glm::vec3 front;
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cameraFront = glm::normalize(front);
+}
+
+// 回调函数：鼠标滚轮
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	fov -= (float)yoffset;
+	if (fov < 1.0f) fov = 1.0f;
+	if (fov > 80.0f) fov = 80.0f;
+}
+
 // 监控键盘按键的按下和松开
 void proccessInput(GLFWwindow* window)
 {	
@@ -360,9 +421,4 @@ void proccessInput(GLFWwindow* window)
 	//if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
 	//{
 	//}
-}
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-
 }
