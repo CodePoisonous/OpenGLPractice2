@@ -10,6 +10,7 @@
 #define  STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "Camera.h"
 #include "Shader.h"
 
 
@@ -24,17 +25,10 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
 
 // 摄像机状态
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);		// 摄像机位置向量
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);	// 摄像机方向向量
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);		// y轴正方向
-
-// 鼠标状态
-bool firstMouse = true;	// 鼠标是否第一次进入窗口
-float yaw = -90.0f;		// 偏航角
-float pitch = 0.0f;		// 俯仰角
+Camera camera;
 float lastX = SCR_WIDTH * 0.5;	// 鼠标在x轴前一帧的位置
 float lastY = SCR_HEIGHT * 0.5;	// 鼠标在y轴前一帧的位置
-float fov = 45.0f;		// 投影夹角
+bool firstMouse = true;	// 鼠标是否第一次进入窗口
 
 // 记录没帧之间的时间差值
 float deltaTime = 0.0f;	// 当前帧与上一帧的时间差
@@ -269,15 +263,15 @@ int main()
 		// 创建投影矩阵(project matrix) 		
 		glm::mat4 projection(1.0f);
 		{
-			projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+			projection = glm::perspective(glm::radians(camera.Zoom),
+				(float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 			shaderProgram.setMatrix4fv("projection", glm::value_ptr(projection));
 		}
 
 		// 创建观察矩阵(view matrix)
 		glm::mat4 view(1.0f);
 		{
-			view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-
+			view = camera.GetViewMatrix();
 			shaderProgram.setMatrix4fv("view", glm::value_ptr(view));
 		}
 
@@ -331,7 +325,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	float xPos = (float)xpos;
 	float yPos = (float)ypos;
-	
+
 	// 第一次时初始化位置
 	if (firstMouse)
 	{
@@ -340,41 +334,21 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 		firstMouse = false;
 	}
 
-	// 计算两帧之间的鼠标位移
+	// 计算两帧之间的鼠标位移 
 	float xoffset = xPos - lastX;
-	float yoffset = lastY - yPos;	// 窗口坐标和opengl的y轴坐标是反的
-	
+	float yoffset = lastY - yPos;// 窗口坐标和opengl的y轴坐标是反的
+
 	// 保存当前帧的位置
 	lastX = xPos;
 	lastY = yPos;
 
-	// 设置鼠标灵敏度
-	float sensitivity = 0.1f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	// 修改俯仰角和偏航角
-	pitch += yoffset;
-	yaw += xoffset;
-
-	// 限制俯仰角和偏航角的范围
-	if (pitch > 89.0f) pitch = 89.0f;
-	if (pitch < -89.0f) pitch = -89.0f;
-
-	// 更新摄像机方向向量
-	glm::vec3 front;
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	cameraFront = glm::normalize(front);
+	camera.ProcessMouseMovement(xoffset, yoffset, true);
 }
 
 // 回调函数：鼠标滚轮
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	fov -= (float)yoffset;
-	if (fov < 1.0f) fov = 1.0f;
-	if (fov > 80.0f) fov = 80.0f;
+	camera.ProcessMouseScroll((float)yoffset);
 }
 
 // 监控键盘按键的按下和松开
@@ -383,42 +357,12 @@ void proccessInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);// 用户按下esc键，关闭窗口
 	
-	float cameraSpeed = 2.5f * deltaTime;	// 相机速度
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos += cameraSpeed * cameraFront;
-
+		camera.ProcessKeyboard(FORWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cameraPos -= cameraSpeed * cameraFront;
-
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-
+		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-
-
-	//if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-	//{
-	//}
-
-	//if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-	//{
-	//}
-
-	//if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-	//{
-	//}
-
-	//if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-	//{
-	//}
-
-
-	//if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-	//{
-	//}
-
-	//if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-	//{
-	//}
+		camera.ProcessKeyboard(RIGHT, deltaTime);
 }
