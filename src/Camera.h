@@ -20,6 +20,8 @@ public:
 public:
 	// 获取观察矩阵
 	glm::mat4 GetViewMatrix();
+	// 获取相机在世界坐标中的位置
+	glm::vec3 GetCameraPosition();
 
 public:
 	// 键鼠响应

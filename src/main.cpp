@@ -92,47 +92,48 @@ int main()
 	// 设置顶点数组标准化设备坐标(Normalized Device Coordinates)
 	// 设置每个顶点对应的颜色信息
 	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,
-		 0.5f, -0.5f, -0.5f,
-		 0.5f,  0.5f, -0.5f,
-		 0.5f,  0.5f, -0.5f,
-		-0.5f,  0.5f, -0.5f,
-		-0.5f, -0.5f, -0.5f,
+		// 坐标				// 法向量
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-		-0.5f, -0.5f,  0.5f,
-		 0.5f, -0.5f,  0.5f,
-		 0.5f,  0.5f,  0.5f,
-		 0.5f,  0.5f,  0.5f,
-		-0.5f,  0.5f,  0.5f,
-		-0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-		-0.5f,  0.5f,  0.5f,
-		-0.5f,  0.5f, -0.5f,
-		-0.5f, -0.5f, -0.5f,
-		-0.5f, -0.5f, -0.5f,
-		-0.5f, -0.5f,  0.5f,
-		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-		 0.5f,  0.5f,  0.5f,
-		 0.5f,  0.5f, -0.5f,
-		 0.5f, -0.5f, -0.5f,
-		 0.5f, -0.5f, -0.5f,
-		 0.5f, -0.5f,  0.5f,
-		 0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-		-0.5f, -0.5f, -0.5f,
-		 0.5f, -0.5f, -0.5f,
-		 0.5f, -0.5f,  0.5f,
-		 0.5f, -0.5f,  0.5f,
-		-0.5f, -0.5f,  0.5f,
-		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-		-0.5f,  0.5f, -0.5f,
-		 0.5f,  0.5f, -0.5f,
-		 0.5f,  0.5f,  0.5f,
-		 0.5f,  0.5f,  0.5f,
-		-0.5f,  0.5f,  0.5f,
-		-0.5f,  0.5f, -0.5f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
 
 	// 生成被照对象的VAO、VBO
@@ -146,8 +147,11 @@ int main()
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 		// 被照对象顶点位置数据解释
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0); // location = 0
+
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1); // location = 1
 
 		// 解绑vbo和vao（防止被意外修改）
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -164,7 +168,7 @@ int main()
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 		// 光源立方体顶点位置数据解释
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
 		// 解绑vbo和vao（防止被意外修改）
@@ -197,8 +201,25 @@ int main()
 		// 观察矩阵(view matrix)
 		glm::mat4 view = camera.GetViewMatrix();
 		
+		// 让光源有规律的移动
+		lightPos.x = 1.0f + (float)sin(glfwGetTime()) * 2.0f;
+		lightPos.y = (float)sin(glfwGetTime() / 2.0f) * 1.0f;
+
+		// 激活光源
+		lightshader.use();
+		lightshader.setMatrix4fv("projection", glm::value_ptr(projection));
+		lightshader.setMatrix4fv("view", glm::value_ptr(view));
+		glm::mat4 lightmodel(1.0f);
+		lightmodel = glm::translate(lightmodel, lightPos);
+		lightmodel = glm::scale(lightmodel, glm::vec3(0.1f));	// 缩小光源体积
+		lightshader.setMatrix4fv("model", glm::value_ptr(lightmodel));
+		glBindVertexArray(lightVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		// 激活被照对象着色器		
 		objshader.use();
+		objshader.setVec3("lightPos", lightPos);
+		objshader.setVec3("cameraPos", camera.GetCameraPosition());
 		objshader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
 		objshader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		objshader.setMatrix4fv("projection", glm::value_ptr(projection));
@@ -215,27 +236,19 @@ int main()
 			model = glm::translate(model, cubePositions[i]);
 
 			// 让模型以不同的速度绕局部坐标的x轴旋转
-			model = glm::rotate(model,
-				currentFrame * glm::radians(25.0f) * (i+1), glm::vec3(0.5f, 1.0f, 0.0f));
+			//model = glm::rotate(model,
+				//currentFrame * glm::radians(10.0f) * (i+1), glm::vec3(0.5f, 1.0f, 0.0f));
 
 			// 转换矩阵传入着色器
 			objshader.setMatrix4fv("model", glm::value_ptr(model));
 
+			// 法线矩阵
+			glm::mat3 NormalMat = glm::mat3(glm::transpose(glm::inverse(model)));
+			objshader.setMatrix3fv("NormalMat", glm::value_ptr(NormalMat));
+
 			// 绘制立方体
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-
-		// 激活光源
-		lightshader.use();
-		lightshader.setMatrix4fv("projection", glm::value_ptr(projection));
-		lightshader.setMatrix4fv("view", glm::value_ptr(view));
-		glm::mat4 lightmodel(1.0f);
-		lightmodel = glm::translate(lightmodel, lightPos);
-		lightmodel = glm::scale(lightmodel, glm::vec3(0.1f));	// 缩小光源体积
-		lightshader.setMatrix4fv("model", glm::value_ptr(lightmodel));
-		glBindVertexArray(lightVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
 
 		glfwSwapBuffers(window);				// 交换指定窗口的前后端缓冲区
 		glfwPollEvents();						// 处理所有挂起事件
