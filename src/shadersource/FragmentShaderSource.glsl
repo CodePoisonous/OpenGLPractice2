@@ -3,8 +3,7 @@
 
 // 材料属性
 struct Material {
-	vec3 ambient;
-	vec3 diffuse;
+	sampler2D diffuse;
 	vec3 specular;
 	float shininess;
 };
@@ -23,19 +22,20 @@ uniform Light light;
 
 in vec3 FragPos;
 in vec3 FragNormal;
+in vec2 TexCoords;
 
 out vec4 FragColor;
 
 void main()
 {
 	// 环境光
-	vec3 ambient = light.ambient * material.ambient;
+	vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
 
 	// 漫反射
 	vec3 norm = normalize(FragNormal);
 	vec3 lightDir = normalize(light.position - FragPos);	// 顶点指向光源的方向
 	float diffCos = max(dot(norm, lightDir), 0.0);	// 点积求cos值
-	vec3 diffuse = light.diffuse * (diffCos * material.diffuse);
+	vec3 diffuse = light.diffuse * diffCos * vec3(texture(material.diffuse, TexCoords));
 
 	// 镜面光照
 	vec3 viewDir = normalize(cameraPos - FragPos);	// 视线方向
