@@ -5,7 +5,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #define  STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -207,23 +206,36 @@ int main()
 
 		// 激活光源
 		lightshader.use();
-		lightshader.setMatrix4fv("projection", glm::value_ptr(projection));
-		lightshader.setMatrix4fv("view", glm::value_ptr(view));
-		glm::mat4 lightmodel(1.0f);
-		lightmodel = glm::translate(lightmodel, lightPos);
-		lightmodel = glm::scale(lightmodel, glm::vec3(0.1f));	// 缩小光源体积
-		lightshader.setMatrix4fv("model", glm::value_ptr(lightmodel));
-		glBindVertexArray(lightVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		{
+			lightshader.setMat4("projection", projection);
+			lightshader.setMat4("view", view);
+			glm::mat4 lightmodel(1.0f);
+			lightmodel = glm::translate(lightmodel, lightPos);
+			lightmodel = glm::scale(lightmodel, glm::vec3(0.1f));	// 缩小光源体积
+			lightshader.setMat4("model", lightmodel);
+			glBindVertexArray(lightVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 
 		// 激活被照对象着色器		
 		objshader.use();
-		objshader.setVec3("lightPos", lightPos);
-		objshader.setVec3("cameraPos", camera.GetCameraPosition());
-		objshader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-		objshader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		objshader.setMatrix4fv("projection", glm::value_ptr(projection));
-		objshader.setMatrix4fv("view", glm::value_ptr(view));
+		{
+			objshader.setMat4("projection", projection);
+			objshader.setMat4("view", view);
+			objshader.setVec3("cameraPos", camera.GetCameraPosition());
+
+			// 光源属性
+			objshader.setVec3("light.position", lightPos);
+			objshader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+			objshader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+			objshader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+			// 被照对象材质
+			objshader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+			objshader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+			objshader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+			objshader.setFloat("material.shininess", 32.0f);
+		}
 
 		// 绘制10个被照立方体
 		glBindVertexArray(objVAO);
@@ -240,11 +252,11 @@ int main()
 				//currentFrame * glm::radians(10.0f) * (i+1), glm::vec3(0.5f, 1.0f, 0.0f));
 
 			// 转换矩阵传入着色器
-			objshader.setMatrix4fv("model", glm::value_ptr(model));
+			objshader.setMat4("model", model);
 
 			// 法线矩阵
 			glm::mat3 NormalMat = glm::mat3(glm::transpose(glm::inverse(model)));
-			objshader.setMatrix3fv("NormalMat", glm::value_ptr(NormalMat));
+			objshader.setMat3("NormalMat", NormalMat);
 
 			// 绘制立方体
 			glDrawArrays(GL_TRIANGLES, 0, 36);

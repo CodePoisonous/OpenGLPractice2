@@ -2,6 +2,8 @@
 #include <sstream>
 #include <iostream>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Shader.h"
 
 using namespace std;
@@ -83,14 +85,14 @@ void Shader::setVec3(const std::string& name, float x, float y, float z)
 	glUniform3f(glGetUniformLocation(m_shaderProgramID, name.c_str()), x, y, z);
 }
 
-void Shader::setMatrix3fv(const std::string& name, const float* value) const
+void Shader::setMat3(const std::string& name, const glm::mat3& mat) const
 {
-	glUniformMatrix3fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, value);
+	glUniformMatrix3fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void Shader::setMatrix4fv(const std::string& name, const float* value) const
+void Shader::setMat4(const std::string& name, const glm::mat4& mat) const
 {
-	glUniformMatrix4fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, value);
+	glUniformMatrix4fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void Shader::compileShader(const string& vertexSource, const string& fragmentSource)
