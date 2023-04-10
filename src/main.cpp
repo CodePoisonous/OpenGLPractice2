@@ -187,6 +187,8 @@ int main()
 	unsigned int diffuseMap = loadTexture("src/texture/container.png");
 	objshader.use();
 	objshader.setInt("material.diffuse", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, diffuseMap);
 
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))
@@ -210,8 +212,8 @@ int main()
 		glm::mat4 view = camera.GetViewMatrix();
 		
 		// 让光源有规律的移动
-		lightPos.x = 1.0f + (float)sin(glfwGetTime()) * 2.0f;
-		lightPos.y = (float)sin(glfwGetTime() / 2.0f) * 1.0f;
+		//lightPos.x = 1.0f + (float)sin(glfwGetTime()) * 2.0f;
+		//lightPos.y = (float)sin(glfwGetTime() / 2.0f) * 1.0f;
 
 		// 激活光源
 		lightshader.use();
@@ -240,8 +242,6 @@ int main()
 			objshader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
 			// 被照对象材质
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, diffuseMap);
 			objshader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
 			objshader.setFloat("material.shininess", 32.0f);
 		}
