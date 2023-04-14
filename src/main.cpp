@@ -40,8 +40,8 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 int main()
 {
 	// 初始化glfw
-	{
-		glfwInit();
+	glfwInit();
+	{		
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);  // 设置主版本号
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);  // 设置次版本号
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 使用核心模式
@@ -185,10 +185,17 @@ int main()
 
 	// 加载纹理图片
 	unsigned int diffuseMap = loadTexture("src/texture/container.png");
-	objshader.use();
-	objshader.setInt("material.diffuse", 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, diffuseMap);
+	unsigned int specularMap = loadTexture("src/texture/container_specular.png");
+	{
+		objshader.use();
+		objshader.setInt("material.diffuse", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+		objshader.setInt("material.specular", 1);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+	}
 
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))

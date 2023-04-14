@@ -3,9 +3,9 @@
 
 // 材料属性
 struct Material {
-	sampler2D diffuse;
-	vec3 specular;
-	float shininess;
+	sampler2D	diffuse;
+	sampler2D	specular;
+	float		shininess;
 };
 
 // 光源属性
@@ -41,9 +41,8 @@ void main()
 	vec3 viewDir = normalize(cameraPos - FragPos);	// 视线方向
 	vec3 reflectDir = reflect(-lightDir, norm);		// 反射光方向
 	float specCos = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular =light.specular * (specCos * material.specular);
+	vec3 specular = light.specular * specCos * vec3(texture(material.specular, TexCoords));
 
 	// phong模型
-	vec3 result = ambient + diffuse + specular;
-	FragColor = vec4(result, 1);
+	FragColor = vec4(ambient + diffuse + specular, 1);
 }
