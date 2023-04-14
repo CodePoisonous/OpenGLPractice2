@@ -186,6 +186,7 @@ int main()
 	// º”‘ÿŒ∆¿ÌÕº∆¨
 	unsigned int diffuseMap = loadTexture("src/texture/container.png");
 	unsigned int specularMap = loadTexture("src/texture/container_specular.png");
+	unsigned int emissionMap = loadTexture("src/texture/matrix.jpg");
 	{
 		objshader.use();
 		objshader.setInt("material.diffuse", 0);
@@ -195,6 +196,10 @@ int main()
 		objshader.setInt("material.specular", 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularMap);
+
+		objshader.setInt("material.emission", 2);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, emissionMap);
 	}
 
 	// ‰÷»æ—≠ª∑
