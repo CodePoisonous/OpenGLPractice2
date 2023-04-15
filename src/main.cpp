@@ -213,7 +213,7 @@ int main()
 		proccessInput(window);
 
 		// 渲染
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);	// 设置用来清空屏幕的颜色
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	// 设置用来清空屏幕的颜色
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// 清除颜色\深度缓冲
 
 		// 投影矩阵(project matrix) 		
