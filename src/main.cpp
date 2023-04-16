@@ -62,7 +62,7 @@ int main()
 		glfwSetScrollCallback(window, scroll_callback);	 // 滚轮转动
 
 		// 程序运行时，隐藏掉光标
-		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 
 	// 初始化glad: 加载所有OpenGL功能的指针
@@ -248,10 +248,20 @@ int main()
 			objshader.setVec3("cameraPos", camera.GetCameraPosition());
 
 			// 光源属性
-			objshader.setVec3("light.position", lightPos);
+			//objshader.setVec3("light.position", lightPos);
+			//objshader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+			objshader.setVec3("light.position", camera.GetCameraPosition());
+			objshader.setVec3("light.direction", camera.GetCameraFront());
+			objshader.setFloat("light.cutoffCos", glm::cos(glm::radians(10.5f)));
+			objshader.setFloat("light.outerCutOffCos", glm::cos(glm::radians(15.5f)));
+
 			objshader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
 			objshader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 			objshader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+			objshader.setFloat("light.constant", 1.0f);
+			objshader.setFloat("light.linear", 0.09f);
+			objshader.setFloat("light.quadratic", 0.032f);
 
 			// 被照对象材质
 			objshader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
@@ -269,8 +279,8 @@ int main()
 			model = glm::translate(model, cubePositions[i]);
 
 			// 让模型以不同的速度绕局部坐标的x轴旋转
-			//model = glm::rotate(model,
-				//currentFrame * glm::radians(10.0f) * (i+1), glm::vec3(0.5f, 1.0f, 0.0f));
+			float rad = currentFrame * glm::radians(10.0f) * (i + 1);
+			model = glm::rotate(model, rad, glm::vec3(0.5f, 1.0f, 0.0f));
 
 			// 转换矩阵传入着色器
 			objshader.setMat4("model", model);
@@ -346,6 +356,10 @@ void proccessInput(GLFWwindow* window)
 		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		camera.ProcessKeyboard(UP, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		camera.ProcessKeyboard(DOWN, deltaTime);
 }
 
 unsigned int loadTexture(const char* path)
