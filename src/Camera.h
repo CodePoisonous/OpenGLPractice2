@@ -6,7 +6,9 @@ enum Camera_Movement {
 	FORWARD,
 	BACKWARD,
 	LEFT,
-	RIGHT
+	RIGHT,
+	UP,
+	DOWN
 };
 
 // 欧拉角原理抽象成的摄像机类
@@ -17,11 +19,10 @@ public:
 	Camera(glm::vec3 position, glm::vec3 worldup, float yaw, float pitch);
 	~Camera();
 
-public:
-	// 获取观察矩阵
-	glm::mat4 GetViewMatrix();
-	// 获取相机在世界坐标中的位置
-	glm::vec3 GetCameraPosition();
+public:	
+	glm::mat4 GetViewMatrix();		// 获取观察矩阵	
+	glm::vec3 GetCameraPosition();	// 获取摄像机在世界坐标中的位置
+	glm::vec3 GetCameraFront();		// 获取摄像机方向
 
 public:
 	// 键鼠响应

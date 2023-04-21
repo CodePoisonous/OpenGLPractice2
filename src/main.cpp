@@ -62,7 +62,7 @@ int main()
 		glfwSetScrollCallback(window, scroll_callback);	 // 滚轮转动
 
 		// 程序运行时，隐藏掉光标
-		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 
 	// 初始化glad: 加载所有OpenGL功能的指针
@@ -87,6 +87,14 @@ int main()
 		glm::vec3(1.5f,  2.0f, -2.5f),
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
+
+	// 设置多个点光源在世界坐标系的位置
+	glm::vec3 pointLightPositions[] = {
+		glm::vec3(0.7f,  0.2f,  2.0f),
+		glm::vec3(2.3f, -3.3f, -4.0f),
+		glm::vec3(-4.0f,  2.0f, -12.0f),
+		glm::vec3(0.0f,  0.0f, -3.0f)
 	};
 
 	// 设置顶点数组标准化设备坐标(Normalized Device Coordinates)
@@ -186,7 +194,6 @@ int main()
 	// 加载纹理图片
 	unsigned int diffuseMap = loadTexture("src/texture/container.png");
 	unsigned int specularMap = loadTexture("src/texture/container_specular.png");
-	unsigned int emissionMap = loadTexture("src/texture/matrix.jpg");
 	{
 		objshader.use();
 		objshader.setInt("material.diffuse", 0);
@@ -196,10 +203,6 @@ int main()
 		objshader.setInt("material.specular", 1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularMap);
-
-		objshader.setInt("material.emission", 2);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, emissionMap);
 	}
 
 	// 渲染循环
@@ -213,7 +216,7 @@ int main()
 		proccessInput(window);
 
 		// 渲染
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);	// 设置用来清空屏幕的颜色
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	// 设置用来清空屏幕的颜色
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// 清除颜色\深度缓冲
 
 		// 投影矩阵(project matrix) 		
@@ -221,41 +224,82 @@ int main()
 			glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
 		// 观察矩阵(view matrix)
-		glm::mat4 view = camera.GetViewMatrix();
-		
-		// 让光源有规律的移动
-		//lightPos.x = 1.0f + (float)sin(glfwGetTime()) * 2.0f;
-		//lightPos.y = (float)sin(glfwGetTime() / 2.0f) * 1.0f;
+		glm::mat4 view = camera.GetViewMatrix();		
 
-		// 激活光源
+		// 激活光源，设置光源属性
 		lightshader.use();
 		{
 			lightshader.setMat4("projection", projection);
 			lightshader.setMat4("view", view);
+		}
+
+		// 绘制4个光源
+		glBindVertexArray(lightVAO);
+		for (unsigned int i = 0; i < 4; ++i)
+		{
 			glm::mat4 lightmodel(1.0f);
-			lightmodel = glm::translate(lightmodel, lightPos);
+			lightmodel = glm::translate(lightmodel, pointLightPositions[i]);
 			lightmodel = glm::scale(lightmodel, glm::vec3(0.1f));	// 缩小光源体积
 			lightshader.setMat4("model", lightmodel);
-			glBindVertexArray(lightVAO);
+			
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		// 激活被照对象着色器		
+		// 激活被照对象着色器，设置属性
 		objshader.use();
 		{
 			objshader.setMat4("projection", projection);
 			objshader.setMat4("view", view);
-			objshader.setVec3("cameraPos", camera.GetCameraPosition());
-
-			// 光源属性
-			objshader.setVec3("light.position", lightPos);
-			objshader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-			objshader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-			objshader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-
-			// 被照对象材质
-			objshader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+			objshader.setVec3("cameraPos", camera.GetCameraPosition());			
 			objshader.setFloat("material.shininess", 32.0f);
+
+			objshader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+			objshader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+			objshader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+			objshader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+
+			objshader.setVec3("pointLights[0].position", pointLightPositions[0]);
+			objshader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+			objshader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+			objshader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+			objshader.setFloat("pointLights[0].constant", 1.0f);
+			objshader.setFloat("pointLights[0].linear", 0.09f);
+			objshader.setFloat("pointLights[0].quadratic", 0.032f);
+			
+			objshader.setVec3("pointLights[1].position", pointLightPositions[1]);
+			objshader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+			objshader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+			objshader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+			objshader.setFloat("pointLights[1].constant", 1.0f);
+			objshader.setFloat("pointLights[1].linear", 0.09f);
+			objshader.setFloat("pointLights[1].quadratic", 0.032f);
+			
+			objshader.setVec3("pointLights[2].position", pointLightPositions[2]);
+			objshader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+			objshader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+			objshader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+			objshader.setFloat("pointLights[2].constant", 1.0f);
+			objshader.setFloat("pointLights[2].linear", 0.09f);
+			objshader.setFloat("pointLights[2].quadratic", 0.032f);
+			
+			objshader.setVec3("pointLights[3].position", pointLightPositions[3]);
+			objshader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+			objshader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+			objshader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+			objshader.setFloat("pointLights[3].constant", 1.0f);
+			objshader.setFloat("pointLights[3].linear", 0.09f);
+			objshader.setFloat("pointLights[3].quadratic", 0.032f);
+			
+			objshader.setVec3("spotLight.position", camera.GetCameraPosition());
+			objshader.setVec3("spotLight.direction", camera.GetCameraFront());
+			objshader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+			objshader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+			objshader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+			objshader.setFloat("spotLight.constant", 1.0f);
+			objshader.setFloat("spotLight.linear", 0.09f);
+			objshader.setFloat("spotLight.quadratic", 0.032f);
+			objshader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+			objshader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 		}
 
 		// 绘制10个被照立方体
@@ -269,8 +313,8 @@ int main()
 			model = glm::translate(model, cubePositions[i]);
 
 			// 让模型以不同的速度绕局部坐标的x轴旋转
-			//model = glm::rotate(model,
-				//currentFrame * glm::radians(10.0f) * (i+1), glm::vec3(0.5f, 1.0f, 0.0f));
+			float rad = currentFrame * glm::radians(10.0f) * (i + 1);
+			model = glm::rotate(model, rad, glm::vec3(0.5f, 1.0f, 0.0f));
 
 			// 转换矩阵传入着色器
 			objshader.setMat4("model", model);
@@ -346,6 +390,10 @@ void proccessInput(GLFWwindow* window)
 		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		camera.ProcessKeyboard(UP, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		camera.ProcessKeyboard(DOWN, deltaTime);
 }
 
 unsigned int loadTexture(const char* path)
