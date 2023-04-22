@@ -2,7 +2,8 @@
 
 #include <glm/glm.hpp>
 
-enum Camera_Movement {
+enum Camera_Movement 
+{
 	FORWARD,
 	BACKWARD,
 	LEFT,

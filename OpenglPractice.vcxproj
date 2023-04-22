@@ -78,8 +78,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)3rd\GLFW\include;$(ProjectDir)3rd\Glad\include;$(ProjectDir)3rd\glm;$(ProjectDir)3rd\stb_image;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)3rd\GLFW\build\src\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)3rd\GLFW\include;$(ProjectDir)3rd\Glad\include;$(ProjectDir)3rd\glm;$(ProjectDir)3rd\stb_image;$(ProjectDir)3rd\assimp\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)3rd\GLFW\build\src\Debug;$(ProjectDir)3rd\assimp\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -122,7 +122,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -145,16 +145,17 @@
     <ClCompile Include="3rd\Glad\src\glad.c" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="3rd\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\shadersource\FragmentShaderSource.glsl" />
-    <None Include="src\shadersource\LightFragmentShaderSource .glsl" />
     <None Include="src\shadersource\LightFragmentShaderSource.glsl" />
     <None Include="src\shadersource\VertexShaderSource.glsl" />
   </ItemGroup>

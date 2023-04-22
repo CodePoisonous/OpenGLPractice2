@@ -13,36 +13,59 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{d1636995-cb05-4b28-a76d-995962289385}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\shadersource">
+      <UniqueIdentifier>{5501fc99-e486-4f69-a9f7-c968491835ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="3rd">
+      <UniqueIdentifier>{579cef64-73e6-41e7-a5a9-1308dbdb7d9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\main">
+      <UniqueIdentifier>{b7a6a250-2c90-4233-85f1-3f7063bd63d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="3rd\Glad\src\glad.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Camera.cpp">
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Shader.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Camera.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="3rd\Glad\src\glad.c">
+      <Filter>3rd</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Mesh.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src\main</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Camera.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClInclude Include="src\Shader.h">
-      <Filter>Header Files</Filter>
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Mesh.h">
+      <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="3rd\stb_image\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Camera.h">
-      <Filter>Header Files</Filter>
+      <Filter>3rd</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\shadersource\FragmentShaderSource.glsl" />
-    <None Include="src\shadersource\VertexShaderSource.glsl" />
-    <None Include="src\shadersource\LightFragmentShaderSource .glsl" />
-    <None Include="src\shadersource\LightFragmentShaderSource.glsl" />
+    <None Include="src\shadersource\FragmentShaderSource.glsl">
+      <Filter>src\shadersource</Filter>
+    </None>
+    <None Include="src\shadersource\LightFragmentShaderSource.glsl">
+      <Filter>src\shadersource</Filter>
+    </None>
+    <None Include="src\shadersource\VertexShaderSource.glsl">
+      <Filter>src\shadersource</Filter>
+    </None>
   </ItemGroup>
 </Project>
