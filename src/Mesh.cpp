@@ -15,7 +15,7 @@ Mesh::~Mesh()
 
 }
 
-void Mesh::Draw(const Shader& shader)
+void Mesh::Draw(const Shader& shader) const
 {
 	// ∆•≈‰Œ∆¿Ì–≈œ¢
 	unsigned int diffuseNr = 0;

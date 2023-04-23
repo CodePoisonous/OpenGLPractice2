@@ -35,7 +35,7 @@ public:
 	~Mesh();
 
 public:
-	void Draw(const Shader& shader);
+	void Draw(const Shader& shader) const;
 
 private:
 	void setupMesh();
