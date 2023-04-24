@@ -27,7 +27,7 @@ void Mesh::Draw(const Shader& shader) const
 		glActiveTexture(GL_TEXTURE0 + i);
 
 		string number;						// texture 数量
-		string name = m_textures[i].m_type;		// texture 类型
+		string name = m_textures[i].m_type;	// texture 类型
 
 		if ("texture_diffuse" == name)
 			number = to_string(++diffuseNr);
