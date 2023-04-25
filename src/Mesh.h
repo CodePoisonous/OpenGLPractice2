@@ -24,7 +24,7 @@ struct Texture
 {
 	unsigned int m_id;
 	std::string m_type;		// 类型
-	std::string m_path;		// 路径
+	std::string m_path;		// 路径（用于与其他纹理进行比较）
 };
 
 // 网格数据
@@ -41,12 +41,12 @@ private:
 	void setupMesh();
 
 public:
-	std::vector<Vertex> m_vertices;
-	std::vector<unsigned int> m_indices;
-	std::vector<Texture> m_textures;
+	std::vector<Vertex> m_vertices;			// 顶点
+	std::vector<unsigned int> m_indices;	// 索引
+	std::vector<Texture> m_textures;		// 纹理
 
 private:
-	unsigned int m_VAO;
-	unsigned int m_VBO;
-	unsigned int m_EBO;
+	unsigned int m_VAO;	// vertex array object
+	unsigned int m_VBO;	// vertex buffer object
+	unsigned int m_EBO;	// element buffer object
 };

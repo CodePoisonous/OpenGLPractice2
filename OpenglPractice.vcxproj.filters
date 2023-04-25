@@ -70,6 +70,12 @@
     <None Include="src\shadersource\LightFragmentShaderSource.glsl">
       <Filter>src\shadersource</Filter>
     </None>
+    <None Include="src\shadersource\model_loading_fs.glsl">
+      <Filter>src\shadersource</Filter>
+    </None>
+    <None Include="src\shadersource\model_loading_vs.glsl">
+      <Filter>src\shadersource</Filter>
+    </None>
     <None Include="src\shadersource\VertexShaderSource.glsl">
       <Filter>src\shadersource</Filter>
     </None>

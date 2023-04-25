@@ -11,6 +11,7 @@
 
 #include "Camera.h"
 #include "Shader.h"
+#include "Model.h"
 
 
 // 函数声明
@@ -75,6 +76,7 @@ int main()
 	// 配置全局的Opengl状态
 	glEnable(GL_DEPTH_TEST);	// 打开深度测试
 
+	/*
 	// 设定立方体在世界坐标系的位置
 	glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
@@ -188,8 +190,8 @@ int main()
 	}
 
 	// 生成着色器程序
-	Shader objshader("src/shadersource/VertexShaderSource.glsl", "src/shadersource/FragmentShaderSource.glsl");
-	Shader lightshader("src/shadersource/VertexShaderSource.glsl", "src/shadersource/LightFragmentShaderSource.glsl");
+	Shader objshader("src/shadersource/VertexShaderSource.vs", "src/shadersource/FragmentShaderSource.fs");
+	Shader lightshader("src/shadersource/VertexShaderSource.vs", "src/shadersource/LightFragmentShaderSource.fs");
 
 	// 加载纹理图片
 	unsigned int diffuseMap = loadTexture("src/texture/container.png");
@@ -204,6 +206,13 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularMap);
 	}
+	*/
+
+	// 外部导入的模型对象
+	Model ourModel("src/modelsource/nanosuit/nanosuit.obj");
+
+	// 外部导入模型的shader
+	Shader modelShader("src/shadersource/model_loading_vs.glsl","src/shadersource/model_loading_fs.glsl");
 
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))
@@ -219,13 +228,28 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	// 设置用来清空屏幕的颜色
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// 清除颜色\深度缓冲
 
+		modelShader.use();
+
 		// 投影矩阵(project matrix) 		
 		glm::mat4 projection = glm::perspective(
 			glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+		modelShader.setMat4("projection", projection);
 
 		// 观察矩阵(view matrix)
 		glm::mat4 view = camera.GetViewMatrix();		
+		modelShader.setMat4("view", view);
 
+		// 模型矩阵
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.1f));
+		modelShader.setMat4("model", model);
+
+		ourModel.Draw(modelShader);
+
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+		/*
 		// 激活光源，设置光源属性
 		lightshader.use();
 		{
@@ -326,15 +350,17 @@ int main()
 			// 绘制立方体
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+		*/
 
 		glfwSwapBuffers(window);				// 交换指定窗口的前后端缓冲区
 		glfwPollEvents();						// 处理所有挂起事件
 	}
 
 	// 释放、删除之前分配的所有资源
-	glDeleteVertexArrays(2, &objVAO);
-	glDeleteBuffers(2, &vbo);
-	objshader.deleteProgram();
+	//glDeleteVertexArrays(2, &objVAO);
+	//glDeleteBuffers(2, &vbo);
+	//objshader.deleteProgram();
+	modelShader.deleteProgram();
 	glfwTerminate();
     return 0;
 }

@@ -29,16 +29,13 @@ void Mesh::Draw(const Shader& shader) const
 		string number;						// texture 数量
 		string name = m_textures[i].m_type;	// texture 类型
 
-		if ("texture_diffuse" == name)
-			number = to_string(++diffuseNr);
-		else if ("texture_specular" == name)
-			number = to_string(++diffuseNr);
-		else if ("texture_normal" == name)
-			number = to_string(++diffuseNr);
-		else if ("texture_height" == name)
-			number = to_string(++diffuseNr);
+		if ("texture_diffuse" == name) number = to_string(++diffuseNr);
+		else if ("texture_specular" == name) number = to_string(++specularNr);
+		else if ("texture_normal" == name) number = to_string(++normalNr);
+		else if ("texture_height" == name) number = to_string(++heightNr);
+		else;
 
-		shader.setInt(("material." + name + number).c_str(), i);
+		shader.setInt((name + number).c_str(), i);
 		
 		glBindTexture(GL_TEXTURE_2D, m_textures[i].m_id);
 	}
@@ -85,7 +82,6 @@ void Mesh::setupMesh()
 
 	glEnableVertexAttribArray(6);	// 顶点 Weights
 	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
-
 
 	glBindVertexArray(0);
 }

@@ -159,6 +159,8 @@
   <ItemGroup>
     <None Include="src\shadersource\FragmentShaderSource.glsl" />
     <None Include="src\shadersource\LightFragmentShaderSource.glsl" />
+    <None Include="src\shadersource\model_loading_fs.glsl" />
+    <None Include="src\shadersource\model_loading_vs.glsl" />
     <None Include="src\shadersource\VertexShaderSource.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

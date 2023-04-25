@@ -3,6 +3,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include "stb_image.h"
+
 #include "Shader.h"
 #include "Mesh.h"
 
@@ -86,7 +88,8 @@ Mesh Model::processMesh(const aiMesh* mesh, const aiScene* scene)
 			vx.m_TexCoords.x = mesh->mTextureCoords[0][i].x;
 			vx.m_TexCoords.y = mesh->mTextureCoords[0][i].y;
 		}
-		else vx.m_TexCoords = glm::vec2(0.0f, 0.0f);
+		else 
+			vx.m_TexCoords = glm::vec2(0.0f, 0.0f);
 
 		vertices.push_back(vx);
 	}
@@ -94,7 +97,7 @@ Mesh Model::processMesh(const aiMesh* mesh, const aiScene* scene)
 	// Íø¸ñË÷Òý
 	for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
 	{
-		aiFace face = mesh->mFaces[i];
+		const aiFace& face = mesh->mFaces[i];
 		for (unsigned int j = 0; j < face.mNumIndices; ++j)
 			indices.push_back(face.mIndices[j]);
 	}
@@ -117,23 +120,67 @@ Mesh Model::processMesh(const aiMesh* mesh, const aiScene* scene)
 	return Mesh(vertices, indices, textures);
 }
 
-void Model::loadMaterialTextures(vector<Texture>& Maps, 
-	const aiMaterial* mat, const aiTextureType& type, const string& typeName)
+void Model::loadMaterialTextures(vector<Texture>& Maps, const aiMaterial* mat, 
+	const aiTextureType& type, const string& typeName)
 {
 	Maps.clear();
-
-	for (unsigned int i = 0; i < mat->GetTextureCount(type), ++i)
+	for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i)
 	{
 		aiString str;
 		mat->GetTexture(type, i, &str);
 
-		Texture texture;
-		texture.id = TextureFromFile(str.C_Str(), m_directory);
-		texture.type = typeName;
-		texture.path = str;
-		textures.push_back(texture);
+		const auto& it = find_if(m_textures_loaded.cbegin(), m_textures_loaded.cend(), [&](const Texture& tx)
+		{
+			return string(str.C_Str()) == tx.m_path;
+		});
+
+		if (it == m_textures_loaded.cend())
+		{
+			Texture texture;
+			texture.m_id = TextureFromFile(str.C_Str(), m_directory, false);
+			texture.m_type = typeName;
+			texture.m_path = str.C_Str();
+			m_textures_loaded.push_back(texture);
+			Maps.push_back(texture);
+		}
+		else 
+			Maps.push_back(*it);
+	}
+}
+
+unsigned int Model::TextureFromFile(const string& subPath, const string& directory, bool gamma)
+{
+	string path = directory + '/' + subPath;
+
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1) format = GL_RED;
+		else if (nrComponents == 3) format = GL_RGB;
+		else if (nrComponents == 4) format = GL_RGBA;
+		else;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
 	}
 
-
-	return vector<Texture>();
+	return textureID;
 }
