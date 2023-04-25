@@ -23,7 +23,7 @@ struct Vertex
 struct Texture
 {
 	unsigned int m_id;
-	std::string m_type;		// 类型
+	unsigned int m_type;	// 类型:0diffuse,1specular,2normal,3height
 	std::string m_path;		// 路径（用于与其他纹理进行比较）
 };
 

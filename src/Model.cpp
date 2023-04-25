@@ -109,9 +109,9 @@ Mesh Model::processMesh(const aiMesh* mesh, const aiScene* scene)
 		
 		// Âþ·´ÉäÌùÍ¼¡¢¾µÃæ¹âÌùÍ¼
 		vector<Texture> diffuseMaps;
-		loadMaterialTextures(diffuseMaps, material, aiTextureType_DIFFUSE, "texture_diffuse");
+		loadMaterialTextures(diffuseMaps, material, aiTextureType_DIFFUSE);
 		vector<Texture> specularMaps;
-		loadMaterialTextures(specularMaps, material, aiTextureType_SPECULAR, "texture_specular");
+		loadMaterialTextures(specularMaps, material, aiTextureType_SPECULAR);
 
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
@@ -120,8 +120,7 @@ Mesh Model::processMesh(const aiMesh* mesh, const aiScene* scene)
 	return Mesh(vertices, indices, textures);
 }
 
-void Model::loadMaterialTextures(vector<Texture>& Maps, const aiMaterial* mat, 
-	const aiTextureType& type, const string& typeName)
+void Model::loadMaterialTextures(vector<Texture>& Maps, const aiMaterial* mat, const aiTextureType& type)
 {
 	Maps.clear();
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i)
@@ -138,7 +137,13 @@ void Model::loadMaterialTextures(vector<Texture>& Maps, const aiMaterial* mat,
 		{
 			Texture texture;
 			texture.m_id = TextureFromFile(str.C_Str(), m_directory, false);
-			texture.m_type = typeName;
+
+			if (aiTextureType_DIFFUSE == type) texture.m_type = 0;
+			else if (aiTextureType_SPECULAR == type) texture.m_type = 1;
+			else if(aiTextureType_NORMALS == type) texture.m_type = 2;
+			else if (aiTextureType_HEIGHT == type) texture.m_type = 3;
+			else;
+
 			texture.m_path = str.C_Str();
 			m_textures_loaded.push_back(texture);
 			Maps.push_back(texture);

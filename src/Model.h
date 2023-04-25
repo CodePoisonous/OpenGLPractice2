@@ -21,7 +21,7 @@ private:
 	void loadModel(const std::string& path);
 	void processNode(const aiNode* node, const aiScene* scene);
 	Mesh processMesh(const aiMesh* mesh, const aiScene* scene);
-	void loadMaterialTextures(std::vector<Texture>& Maps, const aiMaterial* mat, const aiTextureType& type, const std::string& typeName);
+	void loadMaterialTextures(std::vector<Texture>& Maps, const aiMaterial* mat, const aiTextureType& type);
 	unsigned int TextureFromFile(const std::string& subPath,  const std::string& directory, bool gamma);
 
 private:

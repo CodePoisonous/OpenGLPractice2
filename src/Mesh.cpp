@@ -26,16 +26,32 @@ void Mesh::Draw(const Shader& shader) const
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
 
-		string number;						// texture 数量
-		string name = m_textures[i].m_type;	// texture 类型
-
-		if ("texture_diffuse" == name) number = to_string(++diffuseNr);
-		else if ("texture_specular" == name) number = to_string(++specularNr);
-		else if ("texture_normal" == name) number = to_string(++normalNr);
-		else if ("texture_height" == name) number = to_string(++heightNr);
+		unsigned int type = m_textures[i].m_type;	// texture 类型
+		string number;	// texture 数量
+		string name;	// texture 类型名
+		if (0 == type)
+		{
+			number = to_string(++diffuseNr);
+			name = "diffuse";
+		}
+		else if (1 == type)
+		{
+			number = to_string(++specularNr);
+			name = "specular";
+		}
+		else if (2 == type)
+		{
+			number = to_string(++normalNr);
+			name = "normal";
+		}
+		else if (3 == type)
+		{
+			number = to_string(++heightNr);
+			name = "height";
+		}
 		else;
 
-		shader.setInt((name + number).c_str(), i);
+		shader.setInt(("material." + name + number).c_str(), i);
 		
 		glBindTexture(GL_TEXTURE_2D, m_textures[i].m_id);
 	}
