@@ -90,6 +90,7 @@ int main()
 		glm::vec3(1.5f,  0.2f, -1.5f),
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
+	*/
 
 	// 设置多个点光源在世界坐标系的位置
 	glm::vec3 pointLightPositions[] = {
@@ -146,6 +147,7 @@ int main()
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 	};
 
+	/*
 	// 生成被照对象的VAO、VBO
 	unsigned int objVAO, vbo;
 	{
@@ -170,15 +172,17 @@ int main()
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 	}
+	*/
 
 	// 生成光源的VAO
-	unsigned int lightVAO;
+	unsigned int lightVAO, lightVBO;
 	{
 		glGenVertexArrays(1, &lightVAO);
-		glBindVertexArray(lightVAO);
+		glGenBuffers(1, &lightVBO);
 
-		// 只需要绑定VBO不用再次设置VBO的数据，因为箱子的VBO数据中已经包含了正确的立方体顶点数据
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBindVertexArray(lightVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);		
 
 		// 光源立方体顶点位置数据解释
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -189,9 +193,9 @@ int main()
 		glBindVertexArray(0);
 	}
 
+	/*
 	// 生成着色器程序
 	Shader objshader("src/shadersource/VertexShaderSource.vs", "src/shadersource/FragmentShaderSource.fs");
-	Shader lightshader("src/shadersource/VertexShaderSource.vs", "src/shadersource/LightFragmentShaderSource.fs");
 
 	// 加载纹理图片
 	unsigned int diffuseMap = loadTexture("src/texture/container.png");
@@ -213,6 +217,8 @@ int main()
 
 	// 外部导入模型的shader
 	Shader modelShader("src/shadersource/model_loading_vs.glsl","src/shadersource/model_loading_fs.glsl");
+	// 光源shader
+	Shader lightshader("src/shadersource/VertexShaderSource.glsl", "src/shadersource/LightFragmentShaderSource.glsl");
 
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))
@@ -228,138 +234,110 @@ int main()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	// 设置用来清空屏幕的颜色
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// 清除颜色\深度缓冲
 
-		modelShader.use();
-
 		// 投影矩阵(project matrix) 		
 		glm::mat4 projection = glm::perspective(
 			glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-		modelShader.setMat4("projection", projection);
 
 		// 观察矩阵(view matrix)
 		glm::mat4 view = camera.GetViewMatrix();		
-		modelShader.setMat4("view", view);
 
-		// 模型矩阵
+		// 模型矩阵(model matrix)
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.1f));
-		modelShader.setMat4("model", model);
 
-		ourModel.Draw(modelShader);
-
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		/*
 		// 激活光源，设置光源属性
 		lightshader.use();
-		{
+		{			
 			lightshader.setMat4("projection", projection);
 			lightshader.setMat4("view", view);
-		}
 
-		// 绘制4个光源
-		glBindVertexArray(lightVAO);
-		for (unsigned int i = 0; i < 4; ++i)
-		{
-			glm::mat4 lightmodel(1.0f);
-			lightmodel = glm::translate(lightmodel, pointLightPositions[i]);
-			lightmodel = glm::scale(lightmodel, glm::vec3(0.1f));	// 缩小光源体积
-			lightshader.setMat4("model", lightmodel);
-			
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			// 绘制4个光源
+			glBindVertexArray(lightVAO);
+			for (unsigned int i = 0; i < 4; ++i)
+			{
+				glm::mat4 lightmodel(1.0f);
+				lightmodel = glm::translate(lightmodel, pointLightPositions[i]);
+				lightmodel = glm::scale(lightmodel, glm::vec3(0.1f));	// 缩小光源体积
+				lightshader.setMat4("model", lightmodel);
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+			}
 		}
 
 		// 激活被照对象着色器，设置属性
-		objshader.use();
+		modelShader.use();
 		{
-			objshader.setMat4("projection", projection);
-			objshader.setMat4("view", view);
-			objshader.setVec3("cameraPos", camera.GetCameraPosition());			
-			objshader.setFloat("material.shininess", 32.0f);
+			modelShader.setMat4("projection", projection);
+			modelShader.setMat4("view", view);
+			modelShader.setMat4("model", model);
 
-			objshader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-			objshader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-			objshader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-			objshader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+			modelShader.setVec3("cameraPos", camera.GetCameraPosition());			
+			modelShader.setFloat("material.shininess", 32.0f);
 
-			objshader.setVec3("pointLights[0].position", pointLightPositions[0]);
-			objshader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-			objshader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-			objshader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-			objshader.setFloat("pointLights[0].constant", 1.0f);
-			objshader.setFloat("pointLights[0].linear", 0.09f);
-			objshader.setFloat("pointLights[0].quadratic", 0.032f);
+			modelShader.setBool("dirLight.is_set", true);
+			modelShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+			modelShader.setVec3("dirLight.lb.ambient", 0.05f, 0.05f, 0.05f);
+			modelShader.setVec3("dirLight.lb.diffuse", 0.4f, 0.4f, 0.4f);
+			modelShader.setVec3("dirLight.lb.specular", 0.5f, 0.5f, 0.5f);
+
+			modelShader.setBool("pointLights[0].is_set", true);
+			modelShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+			modelShader.setVec3("pointLights[0].lb.ambient", 0.05f, 0.05f, 0.05f);
+			modelShader.setVec3("pointLights[0].lb.diffuse", 0.8f, 0.8f, 0.8f);
+			modelShader.setVec3("pointLights[0].lb.specular", 1.0f, 1.0f, 1.0f);
+			modelShader.setFloat("pointLights[0].at.constant", 1.0f);
+			modelShader.setFloat("pointLights[0].at.linear", 0.09f);
+			modelShader.setFloat("pointLights[0].at.quadratic", 0.032f);
 			
-			objshader.setVec3("pointLights[1].position", pointLightPositions[1]);
-			objshader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-			objshader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-			objshader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-			objshader.setFloat("pointLights[1].constant", 1.0f);
-			objshader.setFloat("pointLights[1].linear", 0.09f);
-			objshader.setFloat("pointLights[1].quadratic", 0.032f);
+			modelShader.setBool("pointLights[1].is_set", true);
+			modelShader.setVec3("pointLights[1].position", pointLightPositions[1]);
+			modelShader.setVec3("pointLights[1].lb.ambient", 0.05f, 0.05f, 0.05f);
+			modelShader.setVec3("pointLights[1].lb.diffuse", 0.8f, 0.8f, 0.8f);
+			modelShader.setVec3("pointLights[1].lb.specular", 1.0f, 1.0f, 1.0f);
+			modelShader.setFloat("pointLights[1].at.constant", 1.0f);
+			modelShader.setFloat("pointLights[1].at.linear", 0.09f);
+			modelShader.setFloat("pointLights[1].at.quadratic", 0.032f);
 			
-			objshader.setVec3("pointLights[2].position", pointLightPositions[2]);
-			objshader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-			objshader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-			objshader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-			objshader.setFloat("pointLights[2].constant", 1.0f);
-			objshader.setFloat("pointLights[2].linear", 0.09f);
-			objshader.setFloat("pointLights[2].quadratic", 0.032f);
+			modelShader.setBool("pointLights[2].is_set", true);
+			modelShader.setVec3("pointLights[2].position", pointLightPositions[2]);
+			modelShader.setVec3("pointLights[2].lb.ambient", 0.05f, 0.05f, 0.05f);
+			modelShader.setVec3("pointLights[2].lb.diffuse", 0.8f, 0.8f, 0.8f);
+			modelShader.setVec3("pointLights[2].lb.specular", 1.0f, 1.0f, 1.0f);
+			modelShader.setFloat("pointLights[2].at.constant", 1.0f);
+			modelShader.setFloat("pointLights[2].at.linear", 0.09f);
+			modelShader.setFloat("pointLights[2].at.quadratic", 0.032f);
 			
-			objshader.setVec3("pointLights[3].position", pointLightPositions[3]);
-			objshader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-			objshader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-			objshader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-			objshader.setFloat("pointLights[3].constant", 1.0f);
-			objshader.setFloat("pointLights[3].linear", 0.09f);
-			objshader.setFloat("pointLights[3].quadratic", 0.032f);
+			modelShader.setBool("pointLights[3].is_set", true);
+			modelShader.setVec3("pointLights[3].position", pointLightPositions[3]);
+			modelShader.setVec3("pointLights[3].lb.ambient", 0.05f, 0.05f, 0.05f);
+			modelShader.setVec3("pointLights[3].lb.diffuse", 0.8f, 0.8f, 0.8f);
+			modelShader.setVec3("pointLights[3].lb.specular", 1.0f, 1.0f, 1.0f);
+			modelShader.setFloat("pointLights[3].at.constant", 1.0f);
+			modelShader.setFloat("pointLights[3].at.linear", 0.09f);
+			modelShader.setFloat("pointLights[3].at.quadratic", 0.032f);
 			
-			objshader.setVec3("spotLight.position", camera.GetCameraPosition());
-			objshader.setVec3("spotLight.direction", camera.GetCameraFront());
-			objshader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-			objshader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-			objshader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-			objshader.setFloat("spotLight.constant", 1.0f);
-			objshader.setFloat("spotLight.linear", 0.09f);
-			objshader.setFloat("spotLight.quadratic", 0.032f);
-			objshader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-			objshader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+			modelShader.setBool("spotLight.is_set", true);
+			modelShader.setVec3("spotLight.position", camera.GetCameraPosition());
+			modelShader.setVec3("spotLight.direction", camera.GetCameraFront());
+			modelShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+			modelShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+			modelShader.setVec3("spotLight.lb.ambient", 0.0f, 0.0f, 0.0f);
+			modelShader.setVec3("spotLight.lb.diffuse", 1.0f, 1.0f, 1.0f);
+			modelShader.setVec3("spotLight.lb.specular", 1.0f, 1.0f, 1.0f);
+			modelShader.setFloat("spotLight.at.constant", 1.0f);
+			modelShader.setFloat("spotLight.at.linear", 0.09f);
+			modelShader.setFloat("spotLight.at.quadratic", 0.032f);
 		}
-
-		// 绘制10个被照立方体
-		glBindVertexArray(objVAO);
-		for (unsigned int i = 0; i < 10; ++i)
-		{
-			// 创建模型矩阵(model matrix
-			glm::mat4 model(1.0f);
-
-			// 让模型移动到指定的世界坐标系位置
-			model = glm::translate(model, cubePositions[i]);
-
-			// 让模型以不同的速度绕局部坐标的x轴旋转
-			float rad = currentFrame * glm::radians(10.0f) * (i + 1);
-			model = glm::rotate(model, rad, glm::vec3(0.5f, 1.0f, 0.0f));
-
-			// 转换矩阵传入着色器
-			objshader.setMat4("model", model);
-
-			// 法线矩阵
-			glm::mat3 NormalMat = glm::mat3(glm::transpose(glm::inverse(model)));
-			objshader.setMat3("NormalMat", NormalMat);
-
-			// 绘制立方体
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-		*/
+		ourModel.Draw(modelShader);
 
 		glfwSwapBuffers(window);				// 交换指定窗口的前后端缓冲区
 		glfwPollEvents();						// 处理所有挂起事件
 	}
 
 	// 释放、删除之前分配的所有资源
-	//glDeleteVertexArrays(2, &objVAO);
-	//glDeleteBuffers(2, &vbo);
-	//objshader.deleteProgram();
+	glDeleteVertexArrays(2, &lightVAO);
+	glDeleteBuffers(2, &lightVBO);
+	lightshader.deleteProgram();
 	modelShader.deleteProgram();
 	glfwTerminate();
     return 0;

@@ -3,8 +3,8 @@
 
 // 材料属性
 struct Material {
-	sampler2D	diffuse;	// 漫反射
-	sampler2D	specular;	// 镜面反射
+	sampler2D	diffuse1;	// 漫反射
+	sampler2D	specular1;	// 镜面反射
 	sampler2D	emission;	// 自发光
 	float		shininess;	// 光泽度
 };
@@ -92,17 +92,17 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 	if(!light.is_set) return vec3(0.0f);
 
 	// 环境光
-	vec3 ambient = light.lb.ambient * vec3(texture(material.diffuse, TexCoords));
+	vec3 ambient = light.lb.ambient * vec3(texture(material.diffuse1, TexCoords));
 
 	// 漫反射
 	vec3 lightDir = normalize(-light.direction);
 	float diffCos = max(dot(normal, lightDir), 0.0);
-	vec3 diffuse = light.lb.diffuse * diffCos * vec3(texture(material.diffuse, TexCoords));
+	vec3 diffuse = light.lb.diffuse * diffCos * vec3(texture(material.diffuse1, TexCoords));
 
 	// 镜面光照
 	vec3 reflectDir = reflect(-lightDir, normal);		// 反射光方向
 	float specCos = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular = light.lb.specular * specCos *  vec3(texture(material.specular, TexCoords));
+	vec3 specular = light.lb.specular * specCos *  vec3(texture(material.specular1, TexCoords));
 
 	return ambient + diffuse + specular;
 }
@@ -112,17 +112,17 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 	if(!light.is_set) return vec3(0.0f);
 
 	// 环境光
-	vec3 ambient = light.lb.ambient * vec3(texture(material.diffuse, TexCoords));
+	vec3 ambient = light.lb.ambient * vec3(texture(material.diffuse1, TexCoords));
 
 	// 漫反射
 	vec3 lightDir = normalize(light.position - fragPos);	// 片段指向光源位置的方向
 	float diffCos = max(dot(normal, lightDir), 0.0);		// 点积求cos值
-	vec3 diffuse = light.lb.diffuse * diffCos * vec3(texture(material.diffuse, TexCoords));
+	vec3 diffuse = light.lb.diffuse * diffCos * vec3(texture(material.diffuse1, TexCoords));
 
 	// 镜面光照
 	vec3 reflectDir = reflect(-lightDir, normal);			// 反射光方向
 	float specCos = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular = light.lb.specular * specCos *  vec3(texture(material.specular, TexCoords));
+	vec3 specular = light.lb.specular * specCos *  vec3(texture(material.specular1, TexCoords));
 
 	// 光线衰减系数
 	float distance = length(light.position - FragPos);
@@ -140,17 +140,17 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 	if(!light.is_set) return vec3(0.0f);
 
 	// 环境光
-	vec3 ambient = light.lb.ambient * vec3(texture(material.diffuse, TexCoords));
+	vec3 ambient = light.lb.ambient * vec3(texture(material.diffuse1, TexCoords));
 
 	// 漫反射
 	vec3 lightDir = normalize(light.position - FragPos);	// 片段指向光源位置的方向
 	float diffCos = max(dot(normal, lightDir), 0.0);		// 点积求cos值
-	vec3 diffuse = light.lb.diffuse * diffCos * vec3(texture(material.diffuse, TexCoords));
+	vec3 diffuse = light.lb.diffuse * diffCos * vec3(texture(material.diffuse1, TexCoords));
 
 	// 镜面光照
 	vec3 reflectDir = reflect(-lightDir, normal);			// 反射光方向
 	float specCos = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular = light.lb.specular * specCos *  vec3(texture(material.specular, TexCoords));
+	vec3 specular = light.lb.specular * specCos *  vec3(texture(material.specular1, TexCoords));
 
 	// 根据片段位置计算圆锥光照强度值
 	float thetaCos = dot(lightDir, normalize(-light.direction));	// 片段与光源方向之间的夹角余弦值
