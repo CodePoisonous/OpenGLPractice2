@@ -16,19 +16,19 @@ struct LightBase{
 	vec3 specular;			// 镜面反射
 };
 
+// 定向光
+struct DirLight {
+	bool is_set;			// 是否设置该光源	
+	vec3 direction;			// 方向
+	LightBase lb;			// 基础属性
+};
+
 // 衰减公式的系数
 // 公式：1 / (constant + linear * distance + quadratic * distance^2)
 struct Attenuation	{
 	float constant;			// 常数
 	float linear;			// 一次幂的系数
 	float quadratic;		// 二次幂的系数
-};
-
-// 定向光
-struct DirLight {
-	bool is_set;			// 是否设置该光源	
-	vec3 direction;			// 方向
-	LightBase lb;			// 基础属性
 };
 
 // 点光源
@@ -44,15 +44,15 @@ struct SpotLight {
 	bool is_set;			// 是否设置该光源
 	vec3 position;			// 光源位置
 	vec3 direction;			// 光方向
-	float cutoffCos;		// 内圆锥切光角的余弦值
-	float outerCutOffCos;	// 外圆锥切光角的遇险值
+	float cutOffCos;		// 内圆锥切光角的余弦值
+	float outerCutOffCos;	// 外圆锥切光角的余弦值
 	LightBase lb;			// 基础属性
 	Attenuation at;			// 衰减参数
 };
 
 #define NR_POINT_LIGHTS 4
 uniform PointLight pointLights[NR_POINT_LIGHTS];	// 点光源对象
-uniform DirLight dirlight;							// 定向光对象
+uniform DirLight dirLight;							// 定向光对象
 uniform SpotLight spotLight;						// 聚光对象
 
 uniform vec3 cameraPos;		// 相机位置
@@ -75,7 +75,7 @@ void main()
 	vec3 viewDir = normalize(cameraPos - FragPos);	// 视线方向
 
 	// 定向光
-	vec3 result = CalcDirLight(dirlight, norm, viewDir);
+	vec3 result = CalcDirLight(dirLight, norm, viewDir);
 
 	// 点光源
 	for(int i = 0; i < NR_POINT_LIGHTS; ++i)
@@ -154,7 +154,7 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 
 	// 根据片段位置计算圆锥光照强度值
 	float thetaCos = dot(lightDir, normalize(-light.direction));	// 片段与光源方向之间的夹角余弦值
-	float epsilon = light.cutoffCos - light.outerCutOffCos;			// 内外圆锥切光角差值
+	float epsilon = light.cutOffCos - light.outerCutOffCos;			// 内外圆锥切光角差值
 	float interpolation = (thetaCos - light.outerCutOffCos) / epsilon;	// 插值
 	float intensity = clamp(interpolation, 0.0, 1.0);				// 将插值约束在0.0到1.0之间
 

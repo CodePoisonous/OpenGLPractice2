@@ -76,22 +76,6 @@ int main()
 	// 配置全局的Opengl状态
 	glEnable(GL_DEPTH_TEST);	// 打开深度测试
 
-	/*
-	// 设定立方体在世界坐标系的位置
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
-	*/
-
 	// 设置多个点光源在世界坐标系的位置
 	glm::vec3 pointLightPositions[] = {
 		glm::vec3(0.7f,  0.2f,  2.0f),
@@ -103,76 +87,49 @@ int main()
 	// 设置顶点数组标准化设备坐标(Normalized Device Coordinates)
 	// 设置每个顶点对应的颜色信息
 	float vertices[] = {
-		// positions          // normals           // texture coords
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+		// positions        
+		-0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,
 
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f, -0.5f,
+		-0.5f, -0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
 
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
 
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f,  0.5f,
+		-0.5f, -0.5f, -0.5f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f,  0.5f,
+		-0.5f,  0.5f, -0.5f,
 	};
-
-	/*
-	// 生成被照对象的VAO、VBO
-	unsigned int objVAO, vbo;
-	{
-		glGenVertexArrays(1, &objVAO);
-		glGenBuffers(1, &vbo);
-
-		glBindVertexArray(objVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);				
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-		// 被照对象顶点位置数据解释
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-		glEnableVertexAttribArray(2);
-
-		// 解绑vbo和vao（防止被意外修改）
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-	*/
 
 	// 生成光源的VAO
 	unsigned int lightVAO, lightVBO;
@@ -185,32 +142,13 @@ int main()
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);		
 
 		// 光源立方体顶点位置数据解释
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
 
 		// 解绑vbo和vao（防止被意外修改）
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 	}
-
-	/*
-	// 生成着色器程序
-	Shader objshader("src/shadersource/VertexShaderSource.vs", "src/shadersource/FragmentShaderSource.fs");
-
-	// 加载纹理图片
-	unsigned int diffuseMap = loadTexture("src/texture/container.png");
-	unsigned int specularMap = loadTexture("src/texture/container_specular.png");
-	{
-		objshader.use();
-		objshader.setInt("material.diffuse", 0);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-		objshader.setInt("material.specular", 1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
-	}
-	*/
 
 	// 外部导入的模型对象
 	Model ourModel("src/modelsource/nanosuit/nanosuit.obj");
@@ -246,6 +184,9 @@ int main()
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.1f));
 
+		// 法线矩阵
+		glm::mat3 NormalMat = glm::mat3(glm::transpose(glm::inverse(model)));
+
 		// 激活光源，设置光源属性
 		lightshader.use();
 		{			
@@ -270,6 +211,7 @@ int main()
 			modelShader.setMat4("projection", projection);
 			modelShader.setMat4("view", view);
 			modelShader.setMat4("model", model);
+			modelShader.setMat3("NormalMat", NormalMat);
 
 			modelShader.setVec3("cameraPos", camera.GetCameraPosition());			
 			modelShader.setFloat("material.shininess", 32.0f);
@@ -278,7 +220,7 @@ int main()
 			modelShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
 			modelShader.setVec3("dirLight.lb.ambient", 0.05f, 0.05f, 0.05f);
 			modelShader.setVec3("dirLight.lb.diffuse", 0.4f, 0.4f, 0.4f);
-			modelShader.setVec3("dirLight.lb.specular", 0.5f, 0.5f, 0.5f);
+			modelShader.setVec3("dirLight.lb.specular", 1.0f, 1.0f, 1.0f);
 
 			modelShader.setBool("pointLights[0].is_set", true);
 			modelShader.setVec3("pointLights[0].position", pointLightPositions[0]);
@@ -319,8 +261,8 @@ int main()
 			modelShader.setBool("spotLight.is_set", true);
 			modelShader.setVec3("spotLight.position", camera.GetCameraPosition());
 			modelShader.setVec3("spotLight.direction", camera.GetCameraFront());
-			modelShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-			modelShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+			modelShader.setFloat("spotLight.cutOffCos", glm::cos(glm::radians(12.0f)));
+			modelShader.setFloat("spotLight.outerCutOffCos", glm::cos(glm::radians(15.0f)));
 			modelShader.setVec3("spotLight.lb.ambient", 0.0f, 0.0f, 0.0f);
 			modelShader.setVec3("spotLight.lb.diffuse", 1.0f, 1.0f, 1.0f);
 			modelShader.setVec3("spotLight.lb.specular", 1.0f, 1.0f, 1.0f);

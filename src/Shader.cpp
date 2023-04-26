@@ -62,37 +62,51 @@ void Shader::deleteProgram() const
 
 void Shader::setBool(const std::string& name, bool value) const
 {
-	glUniform1i(glGetUniformLocation(m_shaderProgramID, name.c_str()), (int)value);
+	int location = glGetUniformLocation(m_shaderProgramID, name.c_str());
+	if (-1 == location) cout << "SHADER SETBOOL ERROR: " + name << endl;
+	else glUniform1i(location, (int)value);
 }
 
 void Shader::setInt(const std::string& name, int value) const
 {
-	glUniform1i(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
+	int location = glGetUniformLocation(m_shaderProgramID, name.c_str());
+	if (-1 == location) cout << "SHADER SETINT ERROR: " + name << endl;
+	else glUniform1i(location, value);
 }
 
 void Shader::setFloat(const std::string& name, float value) const
 {
-	glUniform1f(glGetUniformLocation(m_shaderProgramID, name.c_str()), value);
+	int location = glGetUniformLocation(m_shaderProgramID, name.c_str());
+	if (-1 == location) cout << "SHADER SETFLOAT ERROR: " + name << endl;
+	else glUniform1f(location, value);
 }
 
 void Shader::setVec3(const std::string& name, const glm::vec3& value) const
 {
-	glUniform3fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, &value[0]);
+	int location = glGetUniformLocation(m_shaderProgramID, name.c_str());
+	if (-1 == location) cout << "SHADER SETVEC3 ERROR: " + name << endl;
+	else glUniform3fv(location, 1, &value[0]);
 }
 
 void Shader::setVec3(const std::string& name, float x, float y, float z) const
 {
-	glUniform3f(glGetUniformLocation(m_shaderProgramID, name.c_str()), x, y, z);
+	int location = glGetUniformLocation(m_shaderProgramID, name.c_str());
+	if (-1 == location) cout << "SHADER SETVEC3 ERROR: " + name << endl;
+	else glUniform3f(location, x, y, z);
 }
 
 void Shader::setMat3(const std::string& name, const glm::mat3& mat) const
 {
-	glUniformMatrix3fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+	int location = glGetUniformLocation(m_shaderProgramID, name.c_str());
+	if (-1 == location) cout << "SHADER SETMAT3 ERROR: " + name << endl;
+	else glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void Shader::setMat4(const std::string& name, const glm::mat4& mat) const
 {
-	glUniformMatrix4fv(glGetUniformLocation(m_shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+	int location = glGetUniformLocation(m_shaderProgramID, name.c_str());
+	if (-1 == location) cout << "SHADER SETMAT4 ERROR: " + name << endl;
+	else glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void Shader::compileShader(const string& vertexSource, const string& fragmentSource)

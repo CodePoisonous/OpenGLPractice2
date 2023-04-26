@@ -12,13 +12,13 @@ uniform mat4 projection;	// 投影矩阵
 uniform mat3 NormalMat;		// 法线矩阵
 
 out vec3 FragPos;			// 片段在世界坐标系下的坐标				
-//out vec3 FragNormal;		// 片段在世界坐标系下的法向量
+out vec3 FragNormal;		// 片段在世界坐标系下的法向量
 out vec2 TexCoords;			// 纹理坐标
 
 void main()
 {
 	FragPos = vec3(model * vec4(aPos, 1.0));
-	//FragNormal = NormalMat * aNormal;
+	FragNormal = NormalMat * aNormal;
 	TexCoords = aTexCoords;
 
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
