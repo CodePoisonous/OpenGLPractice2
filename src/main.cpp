@@ -22,8 +22,8 @@ void proccessInput(GLFWwindow* window);
 unsigned int loadTexture(const char* path);
 
 // 窗口大小
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 800;
+const unsigned int SCR_WIDTH = 2048;
+const unsigned int SCR_HEIGHT = 1080;
 
 // 摄像机状态
 Camera camera;
@@ -63,7 +63,7 @@ int main()
 		glfwSetScrollCallback(window, scroll_callback);	 // 滚轮转动
 
 		// 程序运行时，隐藏掉光标
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	}
 
 	// 初始化glad: 加载所有OpenGL功能的指针
@@ -151,12 +151,15 @@ int main()
 	}
 
 	// 外部导入的模型对象
-	Model ourModel("src/modelsource/nanosuit/nanosuit.obj");
-
+	//Model ourModel("src/modelsource/nanosuit/nanosuit.obj");
+	Model AyakaModel("src/modelsource/genshin_impact_obj/Ayaka model/Ayaka model.pmx");
+	Model GanyuModel("src/modelsource/genshin_impact_obj/Ganyu model/Ganyu model.pmx");
+	
 	// 外部导入模型的shader
 	Shader modelShader("src/shadersource/model_loading_vs.glsl","src/shadersource/model_loading_fs.glsl");
+	
 	// 光源shader
-	Shader lightshader("src/shadersource/VertexShaderSource.glsl", "src/shadersource/LightFragmentShaderSource.glsl");
+	//Shader lightshader("src/shadersource/VertexShaderSource.glsl", "src/shadersource/LightFragmentShaderSource.glsl");
 
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))
@@ -178,51 +181,42 @@ int main()
 
 		// 观察矩阵(view matrix)
 		glm::mat4 view = camera.GetViewMatrix();		
-
-		// 模型矩阵(model matrix)
-		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.1f));
-
-		// 法线矩阵
-		glm::mat3 NormalMat = glm::mat3(glm::transpose(glm::inverse(model)));
+					
 
 		// 激活光源，设置光源属性
-		lightshader.use();
-		{			
-			lightshader.setMat4("projection", projection);
-			lightshader.setMat4("view", view);
+		//lightshader.use();
+		//{			
+		//	lightshader.setMat4("projection", projection);
+		//	lightshader.setMat4("view", view);
 
-			// 绘制4个光源
-			glBindVertexArray(lightVAO);
-			for (unsigned int i = 0; i < 4; ++i)
-			{
-				glm::mat4 lightmodel(1.0f);
-				lightmodel = glm::translate(lightmodel, pointLightPositions[i]);
-				lightmodel = glm::scale(lightmodel, glm::vec3(0.1f));	// 缩小光源体积
-				lightshader.setMat4("model", lightmodel);
-				glDrawArrays(GL_TRIANGLES, 0, 36);
-			}
-		}
+		//	// 绘制4个光源
+		//	glBindVertexArray(lightVAO);
+		//	for (unsigned int i = 0; i < 4; ++i)
+		//	{
+		//		glm::mat4 lightmodel(1.0f);
+		//		lightmodel = glm::translate(lightmodel, pointLightPositions[i]);
+		//		lightmodel = glm::scale(lightmodel, glm::vec3(0.1f));	// 缩小光源体积
+		//		lightshader.setMat4("model", lightmodel);
+		//		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//	}
+		//}
 
 		// 激活被照对象着色器，设置属性
 		modelShader.use();
 		{
 			modelShader.setMat4("projection", projection);
 			modelShader.setMat4("view", view);
-			modelShader.setMat4("model", model);
-			modelShader.setMat3("NormalMat", NormalMat);
 
 			modelShader.setVec3("cameraPos", camera.GetCameraPosition());			
 			modelShader.setFloat("material.shininess", 32.0f);
 
 			modelShader.setBool("dirLight.is_set", true);
 			modelShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-			modelShader.setVec3("dirLight.lb.ambient", 0.05f, 0.05f, 0.05f);
+			modelShader.setVec3("dirLight.lb.ambient", 1.0f, 1.0f, 1.0f);
 			modelShader.setVec3("dirLight.lb.diffuse", 0.4f, 0.4f, 0.4f);
 			modelShader.setVec3("dirLight.lb.specular", 1.0f, 1.0f, 1.0f);
 
-			modelShader.setBool("pointLights[0].is_set", true);
+			modelShader.setBool("pointLights[0].is_set", false);
 			modelShader.setVec3("pointLights[0].position", pointLightPositions[0]);
 			modelShader.setVec3("pointLights[0].lb.ambient", 0.05f, 0.05f, 0.05f);
 			modelShader.setVec3("pointLights[0].lb.diffuse", 0.8f, 0.8f, 0.8f);
@@ -231,7 +225,7 @@ int main()
 			modelShader.setFloat("pointLights[0].at.linear", 0.09f);
 			modelShader.setFloat("pointLights[0].at.quadratic", 0.032f);
 			
-			modelShader.setBool("pointLights[1].is_set", true);
+			modelShader.setBool("pointLights[1].is_set", false);
 			modelShader.setVec3("pointLights[1].position", pointLightPositions[1]);
 			modelShader.setVec3("pointLights[1].lb.ambient", 0.05f, 0.05f, 0.05f);
 			modelShader.setVec3("pointLights[1].lb.diffuse", 0.8f, 0.8f, 0.8f);
@@ -240,7 +234,7 @@ int main()
 			modelShader.setFloat("pointLights[1].at.linear", 0.09f);
 			modelShader.setFloat("pointLights[1].at.quadratic", 0.032f);
 			
-			modelShader.setBool("pointLights[2].is_set", true);
+			modelShader.setBool("pointLights[2].is_set", false);
 			modelShader.setVec3("pointLights[2].position", pointLightPositions[2]);
 			modelShader.setVec3("pointLights[2].lb.ambient", 0.05f, 0.05f, 0.05f);
 			modelShader.setVec3("pointLights[2].lb.diffuse", 0.8f, 0.8f, 0.8f);
@@ -249,7 +243,7 @@ int main()
 			modelShader.setFloat("pointLights[2].at.linear", 0.09f);
 			modelShader.setFloat("pointLights[2].at.quadratic", 0.032f);
 			
-			modelShader.setBool("pointLights[3].is_set", true);
+			modelShader.setBool("pointLights[3].is_set", false);
 			modelShader.setVec3("pointLights[3].position", pointLightPositions[3]);
 			modelShader.setVec3("pointLights[3].lb.ambient", 0.05f, 0.05f, 0.05f);
 			modelShader.setVec3("pointLights[3].lb.diffuse", 0.8f, 0.8f, 0.8f);
@@ -258,7 +252,7 @@ int main()
 			modelShader.setFloat("pointLights[3].at.linear", 0.09f);
 			modelShader.setFloat("pointLights[3].at.quadratic", 0.032f);
 			
-			modelShader.setBool("spotLight.is_set", true);
+			modelShader.setBool("spotLight.is_set", false);
 			modelShader.setVec3("spotLight.position", camera.GetCameraPosition());
 			modelShader.setVec3("spotLight.direction", camera.GetCameraFront());
 			modelShader.setFloat("spotLight.cutOffCos", glm::cos(glm::radians(12.0f)));
@@ -270,7 +264,23 @@ int main()
 			modelShader.setFloat("spotLight.at.linear", 0.09f);
 			modelShader.setFloat("spotLight.at.quadratic", 0.032f);
 		}
-		ourModel.Draw(modelShader);
+		
+		// 模型绘制
+		glm::mat4 AyakaModelMat(1.0f);		// 模型矩阵(model matrix)
+		AyakaModelMat = glm::translate(AyakaModelMat, glm::vec3(-1.0f, -0.9f, 1.0f));
+		AyakaModelMat = glm::scale(AyakaModelMat, glm::vec3(0.1f));
+		glm::mat3 AyakaNormalMat = glm::mat3(glm::transpose(glm::inverse(AyakaModelMat)));// 法线矩阵
+		modelShader.setMat4("model", AyakaModelMat);
+		modelShader.setMat3("NormalMat", AyakaNormalMat);
+		AyakaModel.Draw(modelShader);
+
+		glm::mat4 GanyuModelMat(1.0f);
+		GanyuModelMat = glm::translate(GanyuModelMat, glm::vec3(1.0f, -0.9f, 1.0f));
+		GanyuModelMat = glm::scale(GanyuModelMat, glm::vec3(0.1f));
+		glm::mat3 GanyuNormalMat = glm::mat3(glm::transpose(glm::inverse(GanyuModelMat)));
+		modelShader.setMat4("model", GanyuModelMat);
+		modelShader.setMat3("NormalMat", GanyuModelMat);
+		GanyuModel.Draw(modelShader);
 
 		glfwSwapBuffers(window);				// 交换指定窗口的前后端缓冲区
 		glfwPollEvents();						// 处理所有挂起事件
@@ -279,7 +289,7 @@ int main()
 	// 释放、删除之前分配的所有资源
 	glDeleteVertexArrays(2, &lightVAO);
 	glDeleteBuffers(2, &lightVBO);
-	lightshader.deleteProgram();
+	//lightshader.deleteProgram();
 	modelShader.deleteProgram();
 	glfwTerminate();
     return 0;
@@ -294,26 +304,33 @@ void frambuffer_size_callback(GLFWwindow* window, int width, int height)
 // 回调函数：鼠标移动
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	float xPos = (float)xpos;
-	float yPos = (float)ypos;
-
-	// 第一次时初始化位置
-	if (firstMouse)
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS)
 	{
+		float xPos = (float)xpos;
+		float yPos = (float)ypos;
+
+		// 第一次时初始化位置
+		if (firstMouse)
+		{
+			lastX = xPos;
+			lastY = yPos;
+			firstMouse = false;
+		}
+
+		// 计算两帧之间的鼠标位移 
+		float xoffset = xPos - lastX;
+		float yoffset = lastY - yPos;// 窗口坐标和opengl的y轴坐标是反的
+
+		// 保存当前帧的位置
 		lastX = xPos;
 		lastY = yPos;
-		firstMouse = false;
+
+		camera.ProcessMouseMovement(xoffset, yoffset, true);
 	}
-
-	// 计算两帧之间的鼠标位移 
-	float xoffset = xPos - lastX;
-	float yoffset = lastY - yPos;// 窗口坐标和opengl的y轴坐标是反的
-
-	// 保存当前帧的位置
-	lastX = xPos;
-	lastY = yPos;
-
-	camera.ProcessMouseMovement(xoffset, yoffset, true);
+	else
+	{
+		firstMouse = true;
+	}	
 }
 
 // 回调函数：鼠标滚轮
