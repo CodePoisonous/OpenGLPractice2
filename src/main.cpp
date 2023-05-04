@@ -22,8 +22,8 @@ void proccessInput(GLFWwindow* window);
 unsigned int loadTexture(const char* path);
 
 // 窗口大小
-const unsigned int SCR_WIDTH = 2048;
-const unsigned int SCR_HEIGHT = 1080;
+const unsigned int SCR_WIDTH = (int)(2048 * 1.0);
+const unsigned int SCR_HEIGHT = (int)(1080 * 1.0);
 
 // 摄像机状态
 Camera camera;
@@ -151,12 +151,16 @@ int main()
 	}
 
 	// 外部导入的模型对象
-	//Model ourModel("src/modelsource/nanosuit/nanosuit.obj");
 	Model AyakaModel("src/modelsource/genshin_impact_obj/Ayaka model/Ayaka model.pmx");
 	Model GanyuModel("src/modelsource/genshin_impact_obj/Ganyu model/Ganyu model.pmx");
-	
+	Model ThomaModel("src/modelsource/genshin_impact_obj/Genshin impact thoma/Thoma.pmx");
+	Model HuTaoModel("src/modelsource/genshin_impact_obj/Hu Tao model/Hu Tao.pmx");
+	Model LaSignoraModel("src/modelsource/genshin_impact_obj/La signora model/La signora model.pmx");
+	Model scaramoucheModel("src/modelsource/genshin_impact_obj/Scaramouche model/scaramouche Model done.pmx");
+
 	// 外部导入模型的shader
-	Shader modelShader("src/shadersource/model_loading_vs.glsl","src/shadersource/model_loading_fs.glsl");
+	Shader modelShader("src/shadersource/model_loading_vs.glsl",
+		"src/shadersource/model_loading_fs.glsl");
 	
 	// 光源shader
 	//Shader lightshader("src/shadersource/VertexShaderSource.glsl", "src/shadersource/LightFragmentShaderSource.glsl");
@@ -180,8 +184,7 @@ int main()
 			glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
 		// 观察矩阵(view matrix)
-		glm::mat4 view = camera.GetViewMatrix();		
-					
+		glm::mat4 view = camera.GetViewMatrix();					
 
 		// 激活光源，设置光源属性
 		//lightshader.use();
@@ -212,9 +215,9 @@ int main()
 
 			modelShader.setBool("dirLight.is_set", true);
 			modelShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-			modelShader.setVec3("dirLight.lb.ambient", 1.0f, 1.0f, 1.0f);
+			modelShader.setVec3("dirLight.lb.ambient", 0.8f, 0.8f, 0.8f);
 			modelShader.setVec3("dirLight.lb.diffuse", 0.4f, 0.4f, 0.4f);
-			modelShader.setVec3("dirLight.lb.specular", 1.0f, 1.0f, 1.0f);
+			modelShader.setVec3("dirLight.lb.specular", 0.5f, 0.5f, 0.5f);
 
 			modelShader.setBool("pointLights[0].is_set", false);
 			modelShader.setVec3("pointLights[0].position", pointLightPositions[0]);
@@ -266,21 +269,27 @@ int main()
 		}
 		
 		// 模型绘制
-		glm::mat4 AyakaModelMat(1.0f);		// 模型矩阵(model matrix)
-		AyakaModelMat = glm::translate(AyakaModelMat, glm::vec3(-1.0f, -0.9f, 1.0f));
-		AyakaModelMat = glm::scale(AyakaModelMat, glm::vec3(0.1f));
-		glm::mat3 AyakaNormalMat = glm::mat3(glm::transpose(glm::inverse(AyakaModelMat)));// 法线矩阵
-		modelShader.setMat4("model", AyakaModelMat);
-		modelShader.setMat3("NormalMat", AyakaNormalMat);
-		AyakaModel.Draw(modelShader);
+		glm::mat4 leftModelMat(1.0f);		// 模型矩阵(model matrix)
+		leftModelMat = glm::translate(leftModelMat, glm::vec3(-1.0f, -0.9f, 0.0f));
+		leftModelMat = glm::rotate(leftModelMat, glm::radians(currentFrame * 50), glm::vec3(0.0f, 1.0f, 0.0f));
+		leftModelMat = glm::scale(leftModelMat, glm::vec3(0.1f));
+		glm::mat3 leftNormalMat = glm::mat3(glm::transpose(glm::inverse(leftModelMat)));// 法线矩阵
+		modelShader.setMat4("model", leftModelMat);
+		modelShader.setMat3("NormalMat", leftNormalMat);
+		//AyakaModel.Draw(modelShader);
+		//ThomaModel.Draw(modelShader);
+		LaSignoraModel.Draw(modelShader);
 
-		glm::mat4 GanyuModelMat(1.0f);
-		GanyuModelMat = glm::translate(GanyuModelMat, glm::vec3(1.0f, -0.9f, 1.0f));
-		GanyuModelMat = glm::scale(GanyuModelMat, glm::vec3(0.1f));
-		glm::mat3 GanyuNormalMat = glm::mat3(glm::transpose(glm::inverse(GanyuModelMat)));
-		modelShader.setMat4("model", GanyuModelMat);
-		modelShader.setMat3("NormalMat", GanyuModelMat);
-		GanyuModel.Draw(modelShader);
+		glm::mat4 rightModelMat(1.0f);
+		rightModelMat = glm::translate(rightModelMat, glm::vec3(1.0f, -0.9f, 0.0f));
+		rightModelMat = glm::rotate(rightModelMat, glm::radians(currentFrame * 50), glm::vec3(0.0f, 1.0f, 0.0f));
+		rightModelMat = glm::scale(rightModelMat, glm::vec3(0.1f));
+		glm::mat3 rightNormalMat = glm::mat3(glm::transpose(glm::inverse(rightModelMat)));
+		modelShader.setMat4("model", rightModelMat);
+		modelShader.setMat3("NormalMat", rightModelMat);
+		//GanyuModel.Draw(modelShader);
+		//HuTaoModel.Draw(modelShader);
+		scaramoucheModel.Draw(modelShader);
 
 		glfwSwapBuffers(window);				// 交换指定窗口的前后端缓冲区
 		glfwPollEvents();						// 处理所有挂起事件

@@ -2,7 +2,8 @@
 #version 330 core
 
 // 材料属性
-struct Material {
+struct Material
+{
 	sampler2D	diffuse1;	// 漫反射
 	sampler2D	specular1;	// 镜面反射
 	sampler2D	emission;	// 自发光
@@ -10,29 +11,33 @@ struct Material {
 };
 
 // 光照基础属性
-struct LightBase{
+struct LightBase
+{
 	vec3 ambient;			// 环境光
 	vec3 diffuse;			// 漫反射
 	vec3 specular;			// 镜面反射
 };
 
 // 定向光
-struct DirLight {
+struct DirLight
+{
 	bool is_set;			// 是否设置该光源	
 	vec3 direction;			// 方向
 	LightBase lb;			// 基础属性
 };
 
 // 衰减公式的系数
-// 公式：1 / (constant + linear * distance + quadratic * distance^2)
-struct Attenuation	{
+// 公式：1 / (c + l*d + q*d^2)
+struct Attenuation
+{
 	float constant;			// 常数
 	float linear;			// 一次幂的系数
 	float quadratic;		// 二次幂的系数
 };
 
 // 点光源
-struct PointLight {
+struct PointLight
+{
 	bool is_set;			// 是否设置该光源	
 	vec3 position;			// 位置
 	LightBase lb;			// 基础属性
@@ -40,7 +45,8 @@ struct PointLight {
 };
 
 // 聚光
-struct SpotLight {
+struct SpotLight
+{
 	bool is_set;			// 是否设置该光源
 	vec3 position;			// 光源位置
 	vec3 direction;			// 光方向
@@ -169,7 +175,7 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 	return ambient + diffuse + specular;
 }
 
-float calcAttenuation(Attenuation at, float distance)
+float calcAttenuation(Attenuation at, float dist)
 {
-	return 1.0 / (at.constant + at.linear * distance + at.quadratic * (distance * distance));
+	return 1.0 / (at.constant + at.linear * dist + at.quadratic * (dist * dist));
 }
