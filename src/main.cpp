@@ -75,6 +75,11 @@ int main()
 
 	// 配置全局的Opengl状态
 	glEnable(GL_DEPTH_TEST);	// 打开深度测试
+	glDepthFunc(GL_LESS);
+
+	glEnable(GL_STENCIL_TEST);	// 打开模板测试
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 	// 设置多个点光源在世界坐标系的位置
 	glm::vec3 pointLightPositions[] = {
@@ -150,7 +155,7 @@ int main()
 		glBindVertexArray(0);
 	}
 
-	// 外部导入的模型对象
+	// 模型对象
 	Model AyakaModel("src/modelsource/genshin_impact_obj/Ayaka model/Ayaka model.pmx");
 	Model GanyuModel("src/modelsource/genshin_impact_obj/Ganyu model/Ganyu model.pmx");
 	Model ThomaModel("src/modelsource/genshin_impact_obj/Genshin impact thoma/Thoma.pmx");
@@ -158,12 +163,71 @@ int main()
 	Model LaSignoraModel("src/modelsource/genshin_impact_obj/La signora model/La signora model.pmx");
 	Model scaramoucheModel("src/modelsource/genshin_impact_obj/Scaramouche model/scaramouche Model done.pmx");
 
-	// 外部导入模型的shader
-	Shader modelShader("src/shadersource/model_loading_vs.glsl",
-		"src/shadersource/model_loading_fs.glsl");
-	
-	// 光源shader
+	// shader对象
 	//Shader lightshader("src/shadersource/VertexShaderSource.glsl", "src/shadersource/LightFragmentShaderSource.glsl");
+	Shader modelShader("src/shadersource/model_loading_vs.glsl", "src/shadersource/model_loading_fs.glsl");
+	Shader frameShader("src/shadersource/model_loading_vs.glsl", "src/shadersource/LightFragmentShaderSource.glsl");
+
+	// 设置模型Shader的光照信息
+	modelShader.use();
+	{
+		modelShader.setFloat("material.shininess", 32.0f);
+
+		modelShader.setBool("dirLight.is_set", true);
+		modelShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+		modelShader.setVec3("dirLight.lb.ambient", 0.8f, 0.8f, 0.8f);
+		modelShader.setVec3("dirLight.lb.diffuse", 0.4f, 0.4f, 0.4f);
+		modelShader.setVec3("dirLight.lb.specular", 0.5f, 0.5f, 0.5f);
+
+		modelShader.setBool("pointLights[0].is_set", false);
+		modelShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+		modelShader.setVec3("pointLights[0].lb.ambient", 0.05f, 0.05f, 0.05f);
+		modelShader.setVec3("pointLights[0].lb.diffuse", 0.8f, 0.8f, 0.8f);
+		modelShader.setVec3("pointLights[0].lb.specular", 1.0f, 1.0f, 1.0f);
+		modelShader.setFloat("pointLights[0].at.constant", 1.0f);
+		modelShader.setFloat("pointLights[0].at.linear", 0.09f);
+		modelShader.setFloat("pointLights[0].at.quadratic", 0.032f);
+
+		modelShader.setBool("pointLights[1].is_set", false);
+		modelShader.setVec3("pointLights[1].position", pointLightPositions[1]);
+		modelShader.setVec3("pointLights[1].lb.ambient", 0.05f, 0.05f, 0.05f);
+		modelShader.setVec3("pointLights[1].lb.diffuse", 0.8f, 0.8f, 0.8f);
+		modelShader.setVec3("pointLights[1].lb.specular", 1.0f, 1.0f, 1.0f);
+		modelShader.setFloat("pointLights[1].at.constant", 1.0f);
+		modelShader.setFloat("pointLights[1].at.linear", 0.09f);
+		modelShader.setFloat("pointLights[1].at.quadratic", 0.032f);
+
+		modelShader.setBool("pointLights[2].is_set", false);
+		modelShader.setVec3("pointLights[2].position", pointLightPositions[2]);
+		modelShader.setVec3("pointLights[2].lb.ambient", 0.05f, 0.05f, 0.05f);
+		modelShader.setVec3("pointLights[2].lb.diffuse", 0.8f, 0.8f, 0.8f);
+		modelShader.setVec3("pointLights[2].lb.specular", 1.0f, 1.0f, 1.0f);
+		modelShader.setFloat("pointLights[2].at.constant", 1.0f);
+		modelShader.setFloat("pointLights[2].at.linear", 0.09f);
+		modelShader.setFloat("pointLights[2].at.quadratic", 0.032f);
+
+		modelShader.setBool("pointLights[3].is_set", false);
+		modelShader.setVec3("pointLights[3].position", pointLightPositions[3]);
+		modelShader.setVec3("pointLights[3].lb.ambient", 0.05f, 0.05f, 0.05f);
+		modelShader.setVec3("pointLights[3].lb.diffuse", 0.8f, 0.8f, 0.8f);
+		modelShader.setVec3("pointLights[3].lb.specular", 1.0f, 1.0f, 1.0f);
+		modelShader.setFloat("pointLights[3].at.constant", 1.0f);
+		modelShader.setFloat("pointLights[3].at.linear", 0.09f);
+		modelShader.setFloat("pointLights[3].at.quadratic", 0.032f);
+
+		modelShader.setBool("spotLight.is_set", false);
+		modelShader.setVec3("spotLight.position", camera.GetCameraPosition());
+		modelShader.setVec3("spotLight.direction", camera.GetCameraFront());
+		modelShader.setFloat("spotLight.cutOffCos", glm::cos(glm::radians(12.0f)));
+		modelShader.setFloat("spotLight.outerCutOffCos", glm::cos(glm::radians(15.0f)));
+		modelShader.setVec3("spotLight.lb.ambient", 0.0f, 0.0f, 0.0f);
+		modelShader.setVec3("spotLight.lb.diffuse", 1.0f, 1.0f, 1.0f);
+		modelShader.setVec3("spotLight.lb.specular", 1.0f, 1.0f, 1.0f);
+		modelShader.setFloat("spotLight.at.constant", 1.0f);
+		modelShader.setFloat("spotLight.at.linear", 0.09f);
+		modelShader.setFloat("spotLight.at.quadratic", 0.032f);
+	}
+
 
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))
@@ -177,7 +241,7 @@ int main()
 
 		// 渲染
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	// 设置用来清空屏幕的颜色
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// 清除颜色\深度缓冲
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);	// 清除：颜色缓冲\深度缓冲\模板缓冲
 
 		// 投影矩阵(project matrix) 		
 		glm::mat4 projection = glm::perspective(
@@ -204,92 +268,62 @@ int main()
 		//	}
 		//}
 
-		// 激活被照对象着色器，设置属性
-		modelShader.use();
-		{
+
+		// 左侧模型绘制
+		{			
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);
+			glStencilMask(0xFF);
+
+			// 激活被照对象着色器，设置VP矩阵及相机位置
+			modelShader.use();
 			modelShader.setMat4("projection", projection);
 			modelShader.setMat4("view", view);
+			modelShader.setVec3("cameraPos", camera.GetCameraPosition());
 
-			modelShader.setVec3("cameraPos", camera.GetCameraPosition());			
-			modelShader.setFloat("material.shininess", 32.0f);
+			// 设置左侧模型M矩阵及法向量矩阵
+			glm::mat4 leftModelMat(1.0f);		// 模型矩阵(model matrix)
+			leftModelMat = glm::translate(leftModelMat, glm::vec3(-1.0f, -0.9f, 0.0f));
+			leftModelMat = glm::rotate(leftModelMat, glm::radians(currentFrame * 50), glm::vec3(0.0f, 1.0f, 0.0f));
+			leftModelMat = glm::scale(leftModelMat, glm::vec3(0.1f));
+			glm::mat3 leftNormalMat = glm::mat3(glm::transpose(glm::inverse(leftModelMat)));// 法线矩阵
+			modelShader.setMat4("model", leftModelMat);
+			modelShader.setMat3("NormalMat", leftNormalMat);
 
-			modelShader.setBool("dirLight.is_set", true);
-			modelShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-			modelShader.setVec3("dirLight.lb.ambient", 0.8f, 0.8f, 0.8f);
-			modelShader.setVec3("dirLight.lb.diffuse", 0.4f, 0.4f, 0.4f);
-			modelShader.setVec3("dirLight.lb.specular", 0.5f, 0.5f, 0.5f);
+			//AyakaModel.Draw(modelShader);
+			//ThomaModel.Draw(modelShader);
+			LaSignoraModel.Draw(modelShader);
 
-			modelShader.setBool("pointLights[0].is_set", false);
-			modelShader.setVec3("pointLights[0].position", pointLightPositions[0]);
-			modelShader.setVec3("pointLights[0].lb.ambient", 0.05f, 0.05f, 0.05f);
-			modelShader.setVec3("pointLights[0].lb.diffuse", 0.8f, 0.8f, 0.8f);
-			modelShader.setVec3("pointLights[0].lb.specular", 1.0f, 1.0f, 1.0f);
-			modelShader.setFloat("pointLights[0].at.constant", 1.0f);
-			modelShader.setFloat("pointLights[0].at.linear", 0.09f);
-			modelShader.setFloat("pointLights[0].at.quadratic", 0.032f);
-			
-			modelShader.setBool("pointLights[1].is_set", false);
-			modelShader.setVec3("pointLights[1].position", pointLightPositions[1]);
-			modelShader.setVec3("pointLights[1].lb.ambient", 0.05f, 0.05f, 0.05f);
-			modelShader.setVec3("pointLights[1].lb.diffuse", 0.8f, 0.8f, 0.8f);
-			modelShader.setVec3("pointLights[1].lb.specular", 1.0f, 1.0f, 1.0f);
-			modelShader.setFloat("pointLights[1].at.constant", 1.0f);
-			modelShader.setFloat("pointLights[1].at.linear", 0.09f);
-			modelShader.setFloat("pointLights[1].at.quadratic", 0.032f);
-			
-			modelShader.setBool("pointLights[2].is_set", false);
-			modelShader.setVec3("pointLights[2].position", pointLightPositions[2]);
-			modelShader.setVec3("pointLights[2].lb.ambient", 0.05f, 0.05f, 0.05f);
-			modelShader.setVec3("pointLights[2].lb.diffuse", 0.8f, 0.8f, 0.8f);
-			modelShader.setVec3("pointLights[2].lb.specular", 1.0f, 1.0f, 1.0f);
-			modelShader.setFloat("pointLights[2].at.constant", 1.0f);
-			modelShader.setFloat("pointLights[2].at.linear", 0.09f);
-			modelShader.setFloat("pointLights[2].at.quadratic", 0.032f);
-			
-			modelShader.setBool("pointLights[3].is_set", false);
-			modelShader.setVec3("pointLights[3].position", pointLightPositions[3]);
-			modelShader.setVec3("pointLights[3].lb.ambient", 0.05f, 0.05f, 0.05f);
-			modelShader.setVec3("pointLights[3].lb.diffuse", 0.8f, 0.8f, 0.8f);
-			modelShader.setVec3("pointLights[3].lb.specular", 1.0f, 1.0f, 1.0f);
-			modelShader.setFloat("pointLights[3].at.constant", 1.0f);
-			modelShader.setFloat("pointLights[3].at.linear", 0.09f);
-			modelShader.setFloat("pointLights[3].at.quadratic", 0.032f);
-			
-			modelShader.setBool("spotLight.is_set", false);
-			modelShader.setVec3("spotLight.position", camera.GetCameraPosition());
-			modelShader.setVec3("spotLight.direction", camera.GetCameraFront());
-			modelShader.setFloat("spotLight.cutOffCos", glm::cos(glm::radians(12.0f)));
-			modelShader.setFloat("spotLight.outerCutOffCos", glm::cos(glm::radians(15.0f)));
-			modelShader.setVec3("spotLight.lb.ambient", 0.0f, 0.0f, 0.0f);
-			modelShader.setVec3("spotLight.lb.diffuse", 1.0f, 1.0f, 1.0f);
-			modelShader.setVec3("spotLight.lb.specular", 1.0f, 1.0f, 1.0f);
-			modelShader.setFloat("spotLight.at.constant", 1.0f);
-			modelShader.setFloat("spotLight.at.linear", 0.09f);
-			modelShader.setFloat("spotLight.at.quadratic", 0.032f);
+
+			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+			glStencilMask(0x00);
+			glDisable(GL_DEPTH_TEST);
+			frameShader.use();
+			frameShader.setMat4("projection", projection);
+			frameShader.setMat4("view", view);
+			leftModelMat = glm::scale(leftModelMat, glm::vec3(1.01f));
+			frameShader.setMat4("model", leftModelMat);
+			LaSignoraModel.Draw(modelShader);
+			glStencilMask(0xFF);
+			glStencilFunc(GL_ALWAYS, 0, 0xFF);
+			glEnable(GL_DEPTH_TEST);
 		}
-		
-		// 模型绘制
-		glm::mat4 leftModelMat(1.0f);		// 模型矩阵(model matrix)
-		leftModelMat = glm::translate(leftModelMat, glm::vec3(-1.0f, -0.9f, 0.0f));
-		leftModelMat = glm::rotate(leftModelMat, glm::radians(currentFrame * 50), glm::vec3(0.0f, 1.0f, 0.0f));
-		leftModelMat = glm::scale(leftModelMat, glm::vec3(0.1f));
-		glm::mat3 leftNormalMat = glm::mat3(glm::transpose(glm::inverse(leftModelMat)));// 法线矩阵
-		modelShader.setMat4("model", leftModelMat);
-		modelShader.setMat3("NormalMat", leftNormalMat);
-		//AyakaModel.Draw(modelShader);
-		//ThomaModel.Draw(modelShader);
-		LaSignoraModel.Draw(modelShader);
 
-		glm::mat4 rightModelMat(1.0f);
-		rightModelMat = glm::translate(rightModelMat, glm::vec3(1.0f, -0.9f, 0.0f));
-		rightModelMat = glm::rotate(rightModelMat, glm::radians(currentFrame * 50), glm::vec3(0.0f, 1.0f, 0.0f));
-		rightModelMat = glm::scale(rightModelMat, glm::vec3(0.1f));
-		glm::mat3 rightNormalMat = glm::mat3(glm::transpose(glm::inverse(rightModelMat)));
-		modelShader.setMat4("model", rightModelMat);
-		modelShader.setMat3("NormalMat", rightModelMat);
-		//GanyuModel.Draw(modelShader);
-		//HuTaoModel.Draw(modelShader);
-		scaramoucheModel.Draw(modelShader);
+
+
+
+		//// 设置右侧模型M矩阵及法向量矩阵
+		//glm::mat4 rightModelMat(1.0f);
+		//rightModelMat = glm::translate(rightModelMat, glm::vec3(1.0f, -0.9f, 0.0f));
+		//rightModelMat = glm::rotate(rightModelMat, glm::radians(currentFrame * 50), glm::vec3(0.0f, 1.0f, 0.0f));
+		//rightModelMat = glm::scale(rightModelMat, glm::vec3(0.1f));
+		//glm::mat3 rightNormalMat = glm::mat3(glm::transpose(glm::inverse(rightModelMat)));
+		//modelShader.setMat4("model", rightModelMat);
+		//modelShader.setMat3("NormalMat", rightModelMat);
+		//
+		//// 绘制右侧模型
+		////GanyuModel.Draw(modelShader);
+		////HuTaoModel.Draw(modelShader);
+		//scaramoucheModel.Draw(modelShader);
 
 		glfwSwapBuffers(window);				// 交换指定窗口的前后端缓冲区
 		glfwPollEvents();						// 处理所有挂起事件
