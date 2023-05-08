@@ -78,8 +78,8 @@ int main()
 	glDepthFunc(GL_LESS);
 
 	glEnable(GL_STENCIL_TEST);	// 打开模板测试
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);		//一开始模板缓冲的默认值是0，所以我们在不等于1的位置绘制物体。
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);	//如果通过测试，就将模板缓冲中的值设置为指定的ref值（如果禁用了模板更新，此语句作废）
 
 	// 设置多个点光源在世界坐标系的位置
 	glm::vec3 pointLightPositions[] = {
@@ -250,6 +250,20 @@ int main()
 		// 观察矩阵(view matrix)
 		glm::mat4 view = camera.GetViewMatrix();					
 
+		// 左侧模型矩阵(model matrix)
+		glm::mat4 leftModelMat(1.0f);
+		leftModelMat = glm::translate(leftModelMat, glm::vec3(-1.0f, -0.9f, 0.0f));
+		leftModelMat = glm::rotate(leftModelMat, glm::radians(currentFrame * 50), glm::vec3(0.0f, 1.0f, 0.0f));
+		leftModelMat = glm::scale(leftModelMat, glm::vec3(0.1f));
+		glm::mat3 leftNormalMat = glm::mat3(glm::transpose(glm::inverse(leftModelMat)));// 法线矩阵
+
+		// 右侧模型矩阵(model matrix)
+		glm::mat4 rightModelMat(1.0f);
+		rightModelMat = glm::translate(rightModelMat, glm::vec3(1.0f, -0.9f, 0.0f));
+		rightModelMat = glm::rotate(rightModelMat, glm::radians(currentFrame * 50), glm::vec3(0.0f, 1.0f, 0.0f));
+		rightModelMat = glm::scale(rightModelMat, glm::vec3(0.1f));
+		glm::mat3 rightNormalMat = glm::mat3(glm::transpose(glm::inverse(rightModelMat)));
+
 		// 激活光源，设置光源属性
 		//lightshader.use();
 		//{			
@@ -267,12 +281,11 @@ int main()
 		//		glDrawArrays(GL_TRIANGLES, 0, 36);
 		//	}
 		//}
-
-
-		// 左侧模型绘制
-		{			
-			glStencilFunc(GL_ALWAYS, 1, 0xFF);
-			glStencilMask(0xFF);
+	
+		// 模型绘制
+		{
+			glStencilFunc(GL_ALWAYS, 1, 0xFF);	// 总是通过模板缓冲
+			glStencilMask(0xFF);				// glStencilOp生效，在绘制的地方将模板缓冲的值设置为1
 
 			// 激活被照对象着色器，设置VP矩阵及相机位置
 			modelShader.use();
@@ -280,50 +293,44 @@ int main()
 			modelShader.setMat4("view", view);
 			modelShader.setVec3("cameraPos", camera.GetCameraPosition());
 
-			// 设置左侧模型M矩阵及法向量矩阵
-			glm::mat4 leftModelMat(1.0f);		// 模型矩阵(model matrix)
-			leftModelMat = glm::translate(leftModelMat, glm::vec3(-1.0f, -0.9f, 0.0f));
-			leftModelMat = glm::rotate(leftModelMat, glm::radians(currentFrame * 50), glm::vec3(0.0f, 1.0f, 0.0f));
-			leftModelMat = glm::scale(leftModelMat, glm::vec3(0.1f));
-			glm::mat3 leftNormalMat = glm::mat3(glm::transpose(glm::inverse(leftModelMat)));// 法线矩阵
 			modelShader.setMat4("model", leftModelMat);
 			modelShader.setMat3("NormalMat", leftNormalMat);
-
 			//AyakaModel.Draw(modelShader);
 			//ThomaModel.Draw(modelShader);
 			LaSignoraModel.Draw(modelShader);
 
+			modelShader.setMat4("model", rightModelMat);
+			modelShader.setMat3("NormalMat", rightModelMat);
+			//GanyuModel.Draw(modelShader);
+			//HuTaoModel.Draw(modelShader);
+			scaramoucheModel.Draw(modelShader);
+		}
 
-			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-			glStencilMask(0x00);
-			glDisable(GL_DEPTH_TEST);
+		// 边框绘制
+		{
+			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);// 在模板缓冲值不为1的地方绘制
+			glStencilMask(0x00);				// glStencilOp失效，不更新模板缓冲
+			glDisable(GL_DEPTH_TEST);			// 关闭深度测试
+
 			frameShader.use();
 			frameShader.setMat4("projection", projection);
 			frameShader.setMat4("view", view);
+
+			// 左侧模型边框
 			leftModelMat = glm::scale(leftModelMat, glm::vec3(1.01f));
 			frameShader.setMat4("model", leftModelMat);
-			LaSignoraModel.Draw(modelShader);
+			LaSignoraModel.Draw(frameShader);
+
+			// 右侧模型边框
+			rightModelMat = glm::scale(rightModelMat, glm::vec3(1.01f));
+			frameShader.setMat4("model", rightModelMat);
+			scaramoucheModel.Draw(frameShader);
+
+			// 将模板缓冲清零，为下一次渲染做准备。
 			glStencilMask(0xFF);
 			glStencilFunc(GL_ALWAYS, 0, 0xFF);
 			glEnable(GL_DEPTH_TEST);
 		}
-
-
-
-
-		//// 设置右侧模型M矩阵及法向量矩阵
-		//glm::mat4 rightModelMat(1.0f);
-		//rightModelMat = glm::translate(rightModelMat, glm::vec3(1.0f, -0.9f, 0.0f));
-		//rightModelMat = glm::rotate(rightModelMat, glm::radians(currentFrame * 50), glm::vec3(0.0f, 1.0f, 0.0f));
-		//rightModelMat = glm::scale(rightModelMat, glm::vec3(0.1f));
-		//glm::mat3 rightNormalMat = glm::mat3(glm::transpose(glm::inverse(rightModelMat)));
-		//modelShader.setMat4("model", rightModelMat);
-		//modelShader.setMat3("NormalMat", rightModelMat);
-		//
-		//// 绘制右侧模型
-		////GanyuModel.Draw(modelShader);
-		////HuTaoModel.Draw(modelShader);
-		//scaramoucheModel.Draw(modelShader);
 
 		glfwSwapBuffers(window);				// 交换指定窗口的前后端缓冲区
 		glfwPollEvents();						// 处理所有挂起事件
