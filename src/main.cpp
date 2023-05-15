@@ -228,6 +228,8 @@ int main()
 		modelShader.setFloat("spotLight.at.quadratic", 0.032f);
 	}
 
+	// 模型绘制模式
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);// 启用线框模式
 
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))
