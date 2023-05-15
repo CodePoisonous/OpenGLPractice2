@@ -12,6 +12,7 @@ class Model
 {
 public:
 	Model(const std::string& path);
+	Model(const std::vector<Mesh>& meshes);
 	~Model();
 
 public:

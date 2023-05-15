@@ -12,7 +12,9 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "Model.h"
+#include "Mesh.h"
 
+using namespace std;
 
 // 函数声明
 void frambuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -80,6 +82,12 @@ int main()
 	glEnable(GL_STENCIL_TEST);	// 打开模板测试
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);		//一开始模板缓冲的默认值是0，所以我们在不等于1的位置绘制物体。
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);	//如果通过测试，就将模板缓冲中的值设置为指定的ref值（如果禁用了模板更新，此语句作废）
+
+	//glEnable(GL_BLEND);			// 打开混合
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//glEnable(GL_CULL_FACE);		// 打开面剔除
+	//glCullFace(GL_FRONT);
 
 	// 设置多个点光源在世界坐标系的位置
 	glm::vec3 pointLightPositions[] = {
@@ -156,10 +164,10 @@ int main()
 	}
 
 	// 模型对象
-	Model AyakaModel("src/modelsource/genshin_impact_obj/Ayaka model/Ayaka model.pmx");
-	Model GanyuModel("src/modelsource/genshin_impact_obj/Ganyu model/Ganyu model.pmx");
-	Model ThomaModel("src/modelsource/genshin_impact_obj/Genshin impact thoma/Thoma.pmx");
-	Model HuTaoModel("src/modelsource/genshin_impact_obj/Hu Tao model/Hu Tao.pmx");
+	//Model AyakaModel("src/modelsource/genshin_impact_obj/Ayaka model/Ayaka model.pmx");
+	//Model GanyuModel("src/modelsource/genshin_impact_obj/Ganyu model/Ganyu model.pmx");
+	//Model ThomaModel("src/modelsource/genshin_impact_obj/Genshin impact thoma/Thoma.pmx");
+	//Model HuTaoModel("src/modelsource/genshin_impact_obj/Hu Tao model/Hu Tao.pmx");
 	Model LaSignoraModel("src/modelsource/genshin_impact_obj/La signora model/La signora model.pmx");
 	Model scaramoucheModel("src/modelsource/genshin_impact_obj/Scaramouche model/scaramouche Model done.pmx");
 

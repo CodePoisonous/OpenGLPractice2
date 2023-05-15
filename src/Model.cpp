@@ -18,6 +18,12 @@ Model::Model(const string& path)
 	loadModel(path);
 }
 
+Model::Model(const vector<Mesh>& meshes)
+	: m_meshs(meshes)
+{
+
+}
+
 Model::~Model()
 {
 
