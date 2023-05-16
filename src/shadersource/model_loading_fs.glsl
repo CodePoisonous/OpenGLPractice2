@@ -73,6 +73,7 @@ out vec4 FragColor;			// 片段最终的颜色
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 getTextureinfor(sampler2D sp);
 float calcAttenuation(Attenuation at, float distance);
 
 void main()
@@ -98,17 +99,17 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 	if(!light.is_set) return vec3(0.0f);
 
 	// 环境光
-	vec3 ambient = light.lb.ambient * vec3(texture(material.diffuse1, TexCoords));
+	vec3 ambient = light.lb.ambient * getTextureinfor(material.diffuse1);//vec3(texture(material.diffuse1, TexCoords));
 
 	// 漫反射
 	vec3 lightDir = normalize(-light.direction);
 	float diffCos = max(dot(normal, lightDir), 0.0);
-	vec3 diffuse = light.lb.diffuse * diffCos * vec3(texture(material.diffuse1, TexCoords));
+	vec3 diffuse = light.lb.diffuse * diffCos * getTextureinfor(material.diffuse1);//vec3(texture(material.diffuse1, TexCoords));
 
 	// 镜面光照
 	vec3 reflectDir = reflect(-lightDir, normal);		// 反射光方向
 	float specCos = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular = light.lb.specular * specCos *  vec3(texture(material.specular1, TexCoords));
+	vec3 specular = light.lb.specular * specCos *   getTextureinfor(material.specular1);//vec3(texture(material.specular1, TexCoords));
 
 	return ambient + diffuse + specular;
 }
@@ -118,17 +119,17 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 	if(!light.is_set) return vec3(0.0f);
 
 	// 环境光
-	vec3 ambient = light.lb.ambient * vec3(texture(material.diffuse1, TexCoords));
+	vec3 ambient = light.lb.ambient * getTextureinfor(material.diffuse1);//vec3(texture(material.diffuse1, TexCoords));
 
 	// 漫反射
 	vec3 lightDir = normalize(light.position - fragPos);	// 片段指向光源位置的方向
 	float diffCos = max(dot(normal, lightDir), 0.0);		// 点积求cos值
-	vec3 diffuse = light.lb.diffuse * diffCos * vec3(texture(material.diffuse1, TexCoords));
+	vec3 diffuse = light.lb.diffuse * diffCos * getTextureinfor(material.diffuse1);//vec3(texture(material.diffuse1, TexCoords));
 
 	// 镜面光照
 	vec3 reflectDir = reflect(-lightDir, normal);			// 反射光方向
 	float specCos = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular = light.lb.specular * specCos *  vec3(texture(material.specular1, TexCoords));
+	vec3 specular = light.lb.specular * specCos *  getTextureinfor(material.specular1);//vec3(texture(material.specular1, TexCoords));
 
 	// 光线衰减系数
 	float distance = length(light.position - FragPos);
@@ -146,17 +147,17 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 	if(!light.is_set) return vec3(0.0f);
 
 	// 环境光
-	vec3 ambient = light.lb.ambient * vec3(texture(material.diffuse1, TexCoords));
+	vec3 ambient = light.lb.ambient * getTextureinfor(material.diffuse1);//vec3(texture(material.diffuse1, TexCoords));
 
 	// 漫反射
 	vec3 lightDir = normalize(light.position - FragPos);	// 片段指向光源位置的方向
 	float diffCos = max(dot(normal, lightDir), 0.0);		// 点积求cos值
-	vec3 diffuse = light.lb.diffuse * diffCos * vec3(texture(material.diffuse1, TexCoords));
+	vec3 diffuse = light.lb.diffuse * diffCos * getTextureinfor(material.diffuse1);//vec3(texture(material.diffuse1, TexCoords));
 
 	// 镜面光照
 	vec3 reflectDir = reflect(-lightDir, normal);			// 反射光方向
 	float specCos = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular = light.lb.specular * specCos *  vec3(texture(material.specular1, TexCoords));
+	vec3 specular = light.lb.specular * specCos *  getTextureinfor(material.specular1);//vec3(texture(material.specular1, TexCoords));
 
 	// 根据片段位置计算圆锥光照强度值
 	float thetaCos = dot(lightDir, normalize(-light.direction));	// 片段与光源方向之间的夹角余弦值
@@ -173,6 +174,41 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 	specular *= attenuation * intensity;
 
 	return ambient + diffuse + specular;
+}
+
+vec3 getTextureinfor(sampler2D sp)
+{
+	const float offset = 1.0 / 300.0;
+
+	vec2 offsets[9] = vec2[](
+			vec2(-offset,  offset), // 左上
+			vec2( 0.0f,    offset), // 正上
+			vec2( offset,  offset), // 右上
+			vec2(-offset,  0.0f),   // 左
+			vec2( 0.0f,    0.0f),   // 中
+			vec2( offset,  0.0f),   // 右
+			vec2(-offset, -offset), // 左下
+			vec2( 0.0f,   -offset), // 正下
+			vec2( offset, -offset)  // 右下
+		);
+
+    float kernel[9] = float[](
+        -1, -1, -1,
+        -1,  9, -1,
+        -1, -1, -1
+    );
+
+    vec3 sampleTex[9];
+    for(int i = 0; i < 9; i++)
+    {
+        sampleTex[i] = vec3(texture(sp, TexCoords.st + offsets[i]));
+    }
+
+    vec3 col = vec3(0.0);
+    for(int i = 0; i < 9; i++)
+        col += sampleTex[i] * kernel[i];
+
+   return col;
 }
 
 float calcAttenuation(Attenuation at, float dist)

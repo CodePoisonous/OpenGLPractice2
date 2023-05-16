@@ -24,8 +24,8 @@ void proccessInput(GLFWwindow* window);
 unsigned int loadTexture(const char* path);
 
 // 窗口大小
-const unsigned int SCR_WIDTH = (int)(2048 * 1.0);
-const unsigned int SCR_HEIGHT = (int)(1080 * 1.0);
+const unsigned int SCR_WIDTH = (int)(2048 * 0.5);
+const unsigned int SCR_HEIGHT = (int)(1080 * 0.5);
 
 // 摄像机状态
 Camera camera;
@@ -237,7 +237,7 @@ int main()
 	}
 
 	// 模型绘制模式
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);// 启用线框模式
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);// 启用线框模式
 
 	// 渲染循环
 	while (!glfwWindowShouldClose(window))
