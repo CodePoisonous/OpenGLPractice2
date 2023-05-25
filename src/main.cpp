@@ -22,13 +22,14 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void proccessInput(GLFWwindow* window);
 unsigned int loadTexture(const char* path);
+unsigned int LoadCubeMap(const vector<string>& faces);
 
 // 窗口大小
-const unsigned int SCR_WIDTH = (int)(2048 * 0.5);
-const unsigned int SCR_HEIGHT = (int)(1080 * 0.5);
+const unsigned int SCR_WIDTH = (int)(2048);
+const unsigned int SCR_HEIGHT = (int)(1080);
 
 // 摄像机状态
-Camera camera;
+Camera camera(glm::vec3(0.0f, 0.8f, 3.0f));
 float lastX = SCR_WIDTH * 0.5;	// 鼠标在x轴前一帧的位置
 float lastY = SCR_HEIGHT * 0.5;	// 鼠标在y轴前一帧的位置
 bool firstMouse = true;	// 鼠标是否第一次进入窗口
@@ -79,9 +80,9 @@ int main()
 	glEnable(GL_DEPTH_TEST);	// 打开深度测试
 	glDepthFunc(GL_LESS);
 
-	glEnable(GL_STENCIL_TEST);	// 打开模板测试
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);		//一开始模板缓冲的默认值是0，所以我们在不等于1的位置绘制物体。
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);	//如果通过测试，就将模板缓冲中的值设置为指定的ref值（如果禁用了模板更新，此语句作废）
+	//glEnable(GL_STENCIL_TEST);	// 打开模板测试
+	//glStencilFunc(GL_NOTEQUAL, 1, 0xFF);		//一开始模板缓冲的默认值是0，所以我们在不等于1的位置绘制物体。
+	//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);	//如果通过测试，就将模板缓冲中的值设置为指定的ref值（如果禁用了模板更新，此语句作废）
 
 	//glEnable(GL_BLEND);			// 打开混合
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -98,7 +99,6 @@ int main()
 	};
 
 	// 设置顶点数组标准化设备坐标(Normalized Device Coordinates)
-	// 设置每个顶点对应的颜色信息
 	float vertices[] = {
 		// positions        
 		-0.5f, -0.5f, -0.5f,
@@ -144,6 +144,52 @@ int main()
 		-0.5f,  0.5f, -0.5f,
 	};
 
+	// 天空盒坐标
+	float skyboxVertices[] = {
+		// positions          
+		-1.0f,  1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+
+		-1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
+
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
+		 1.0f, -1.0f,  1.0f
+	};
+
 	// 生成光源的VAO
 	unsigned int lightVAO, lightVBO;
 	{
@@ -163,6 +209,37 @@ int main()
 		glBindVertexArray(0);
 	}
 
+	// 生成天空盒的VAO
+	unsigned int skyboxVAO, skyboxVBO;
+	{
+		glGenVertexArrays(1, &skyboxVAO);
+		glGenBuffers(1, &skyboxVBO);
+
+		glBindVertexArray(skyboxVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+
+		// 光源立方体顶点位置数据解释
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+
+		// 解绑vbo和vao（防止被意外修改）
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	// 加载天空盒纹理
+	vector<string> skyboxFaces
+	{
+		"src/texture/skybox/right.jpg",
+		"src/texture/skybox/left.jpg",
+		"src/texture/skybox/top.jpg",
+		"src/texture/skybox/bottom.jpg",
+		"src/texture/skybox/front.jpg",
+		"src/texture/skybox/back.jpg"
+	};
+	unsigned int skyboxTexture = LoadCubeMap(skyboxFaces);
+
 	// 模型对象
 	//Model AyakaModel("src/modelsource/genshin_impact_obj/Ayaka model/Ayaka model.pmx");
 	//Model GanyuModel("src/modelsource/genshin_impact_obj/Ganyu model/Ganyu model.pmx");
@@ -174,7 +251,8 @@ int main()
 	// shader对象
 	//Shader lightshader("src/shadersource/VertexShaderSource.glsl", "src/shadersource/LightFragmentShaderSource.glsl");
 	Shader modelShader("src/shadersource/model_loading_vs.glsl", "src/shadersource/model_loading_fs.glsl");
-	Shader frameShader("src/shadersource/model_loading_vs.glsl", "src/shadersource/LightFragmentShaderSource.glsl");
+	//Shader frameShader("src/shadersource/model_loading_vs.glsl", "src/shadersource/LightFragmentShaderSource.glsl");
+	Shader skyboxShader("src/shadersource/skybox_vs.glsl", "src/shadersource/skybox_fs.glsl");
 
 	// 设置模型Shader的光照信息
 	modelShader.use();
@@ -185,7 +263,7 @@ int main()
 		modelShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
 		modelShader.setVec3("dirLight.lb.ambient", 0.8f, 0.8f, 0.8f);
 		modelShader.setVec3("dirLight.lb.diffuse", 0.4f, 0.4f, 0.4f);
-		modelShader.setVec3("dirLight.lb.specular", 0.5f, 0.5f, 0.5f);
+		modelShader.setVec3("dirLight.lb.specular", 0.01f, 0.01f, 0.01f);
 
 		modelShader.setBool("pointLights[0].is_set", false);
 		modelShader.setVec3("pointLights[0].position", pointLightPositions[0]);
@@ -251,7 +329,7 @@ int main()
 
 		// 渲染
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);	// 设置用来清空屏幕的颜色
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);	// 清除：颜色缓冲\深度缓冲\模板缓冲
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT/* | GL_STENCIL_BUFFER_BIT*/);	// 清除：颜色缓冲\深度缓冲\模板缓冲
 
 		// 投影矩阵(project matrix) 		
 		glm::mat4 projection = glm::perspective(
@@ -290,12 +368,12 @@ int main()
 		//		lightshader.setMat4("model", lightmodel);
 		//		glDrawArrays(GL_TRIANGLES, 0, 36);
 		//	}
-		//}
-	
+		//}		
+
 		// 模型绘制
 		{
-			glStencilFunc(GL_ALWAYS, 1, 0xFF);	// 总是通过模板缓冲
-			glStencilMask(0xFF);				// glStencilOp生效，在绘制的地方将模板缓冲的值设置为1
+			//glStencilFunc(GL_ALWAYS, 1, 0xFF);	// 总是通过模板缓冲
+			//glStencilMask(0xFF);				// glStencilOp生效，在绘制的地方将模板缓冲的值设置为1
 
 			// 激活被照对象着色器，设置VP矩阵及相机位置
 			modelShader.use();
@@ -316,30 +394,49 @@ int main()
 			scaramoucheModel.Draw(modelShader);
 		}
 
-		// 边框绘制
+// 		// 边框绘制
+// 		{
+// 			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);// 在模板缓冲值不为1的地方绘制
+// 			glStencilMask(0x00);				// glStencilOp失效，不更新模板缓冲
+// 			glDisable(GL_DEPTH_TEST);			// 关闭深度测试
+// 
+// 			frameShader.use();
+// 			frameShader.setMat4("projection", projection);
+// 			frameShader.setMat4("view", view);
+// 
+// 			// 左侧模型边框
+// 			leftModelMat = glm::scale(leftModelMat, glm::vec3(1.01f));
+// 			frameShader.setMat4("model", leftModelMat);
+// 			LaSignoraModel.Draw(frameShader);
+// 
+// 			// 右侧模型边框
+// 			rightModelMat = glm::scale(rightModelMat, glm::vec3(1.01f));
+// 			frameShader.setMat4("model", rightModelMat);
+// 			scaramoucheModel.Draw(frameShader);
+// 
+// 			// 将模板缓冲清零，为下一次渲染做准备。
+// 			glStencilMask(0xFF);
+// 			glStencilFunc(GL_ALWAYS, 0, 0xFF);
+// 			glEnable(GL_DEPTH_TEST);
+// 		}
+
+		// 天空盒绘制
 		{
-			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);// 在模板缓冲值不为1的地方绘制
-			glStencilMask(0x00);				// glStencilOp失效，不更新模板缓冲
-			glDisable(GL_DEPTH_TEST);			// 关闭深度测试
+			glm::mat4 ModelMat(1.0f);
+			ModelMat = glm::scale(ModelMat, glm::vec3(10.0f));
 
-			frameShader.use();
-			frameShader.setMat4("projection", projection);
-			frameShader.setMat4("view", view);
+			glDepthFunc(GL_LEQUAL);
+			skyboxShader.use();
+			skyboxShader.setMat4("projection", projection);
+			skyboxShader.setMat4("view", view);
+			skyboxShader.setMat4("model", ModelMat);
 
-			// 左侧模型边框
-			leftModelMat = glm::scale(leftModelMat, glm::vec3(1.01f));
-			frameShader.setMat4("model", leftModelMat);
-			LaSignoraModel.Draw(frameShader);
-
-			// 右侧模型边框
-			rightModelMat = glm::scale(rightModelMat, glm::vec3(1.01f));
-			frameShader.setMat4("model", rightModelMat);
-			scaramoucheModel.Draw(frameShader);
-
-			// 将模板缓冲清零，为下一次渲染做准备。
-			glStencilMask(0xFF);
-			glStencilFunc(GL_ALWAYS, 0, 0xFF);
-			glEnable(GL_DEPTH_TEST);
+			glBindVertexArray(skyboxVAO);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glBindVertexArray(0);
+			glDepthFunc(GL_LESS);
 		}
 
 		glfwSwapBuffers(window);				// 交换指定窗口的前后端缓冲区
@@ -347,10 +444,15 @@ int main()
 	}
 
 	// 释放、删除之前分配的所有资源
-	glDeleteVertexArrays(2, &lightVAO);
-	glDeleteBuffers(2, &lightVBO);
+	glDeleteVertexArrays(21, &lightVAO);
+	glDeleteBuffers(1, &lightVBO);
+	glDeleteVertexArrays(1, &skyboxVAO);
+	glDeleteBuffers(1, &skyboxVBO);
+
 	//lightshader.deleteProgram();
 	modelShader.deleteProgram();
+	skyboxShader.deleteProgram();
+
 	glfwTerminate();
     return 0;
 }
@@ -429,12 +531,9 @@ unsigned int loadTexture(const char* path)
 	if (data)
 	{
 		GLenum format;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
+		if (nrComponents == 1) format = GL_RED;
+		else if (nrComponents == 3) format = GL_RGB;
+		else if (nrComponents == 4) format = GL_RGBA;
 
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
@@ -455,3 +554,40 @@ unsigned int loadTexture(const char* path)
 
 	return textureID;
 }
+
+unsigned int LoadCubeMap(const vector<string>& faces)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrComponents;
+	for (unsigned int i = 0; i < faces.size(); ++i)
+	{
+		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrComponents, 0);
+		if (data)
+		{
+			GLenum format;
+			if (nrComponents == 1) format = GL_RED;
+			else if (nrComponents == 3) format = GL_RGB;
+			else if (nrComponents == 4) format = GL_RGBA;
+						
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Texture failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return textureID;
+}
+

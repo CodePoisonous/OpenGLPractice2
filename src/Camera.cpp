@@ -17,6 +17,12 @@ Camera::Camera(glm::vec3 position, glm::vec3 worldup, float yaw, float pitch)
 	updateCameraVector();
 }
 
+Camera::Camera(glm::vec3 position)
+{
+	Position = position;
+	updateCameraVector();
+}
+
 Camera::~Camera()
 {
 

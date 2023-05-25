@@ -79,5 +79,11 @@
     <None Include="src\shadersource\VertexShaderSource.glsl">
       <Filter>src\shadersource</Filter>
     </None>
+    <None Include="src\shadersource\skybox_fs.glsl">
+      <Filter>src\shadersource</Filter>
+    </None>
+    <None Include="src\shadersource\skybox_vs.glsl">
+      <Filter>src\shadersource</Filter>
+    </None>
   </ItemGroup>
 </Project>

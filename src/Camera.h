@@ -17,6 +17,7 @@ class Camera
 {
 public:
 	Camera();
+	Camera(glm::vec3 position);
 	Camera(glm::vec3 position, glm::vec3 worldup, float yaw, float pitch);
 	~Camera();
 
@@ -36,7 +37,7 @@ private:
 	void updateCameraVector();
 
 public:
-	float Zoom = 45.0f;				// 投影角度范围
+	float Zoom = 45.0f;									// 投影角度范围
 
 private:
 	glm::vec3 Position = glm::vec3(0.0f, 0.8f, 3.0f);	// 摄像机位置
@@ -49,7 +50,7 @@ private:
 
 private:
 	float Yaw = -90.0f;				// 偏航角(0°指向x轴正方向，-90°指向z轴负方向)
-	float Pitch = -10.0f;				// 俯仰角
+	float Pitch = -10.0f;			// 俯仰角
 
 private:
 	float MovementSpeed = 2.5f;		// 摄像机移动速度
