@@ -422,11 +422,11 @@ int main()
 
 		// 天空盒绘制
 		{
+			glDepthFunc(GL_LEQUAL);	// 深度测试通过才绘制天空盒
+			skyboxShader.use();
+
 			glm::mat4 ModelMat(1.0f);
 			ModelMat = glm::scale(ModelMat, glm::vec3(10.0f));
-
-			glDepthFunc(GL_LEQUAL);
-			skyboxShader.use();
 			skyboxShader.setMat4("projection", projection);
 			skyboxShader.setMat4("view", view);
 			skyboxShader.setMat4("model", ModelMat);
@@ -572,7 +572,8 @@ unsigned int LoadCubeMap(const vector<string>& faces)
 			else if (nrComponents == 3) format = GL_RGB;
 			else if (nrComponents == 4) format = GL_RGBA;
 						
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+				0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 			stbi_image_free(data);
 		}
 		else
